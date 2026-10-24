@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block titre %}Déposer ma relecture — RedacLo{% endblock %}
+
+{% block contenu %}
+    <h2>Déposer ma relecture</h2>
+
+    <p>Article : <strong>{{ review.article.titre }}</strong></p>
+    <p>Auteur : {{ review.article.auteur.username }}</p>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Déposer ma relecture</button>
+    </form>
+
+    <p><a href="{% url 'articles:detail_article' review.article.pk %}">Annuler</a></p>
+{% endblock %}

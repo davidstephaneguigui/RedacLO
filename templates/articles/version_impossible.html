@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block titre %}Version impossible — {{ article.titre }}{% endblock %}
+
+{% block contenu %}
+    <h2>Impossible de créer une version</h2>
+
+    <p>
+        L'article « {{ article.titre }} » ne possède encore aucune
+        version. Il faut d'abord que l'auteur en crée une.
+    </p>
+
+    <p>
+        <a href="{% url 'articles:detail_article' article.pk %}">
+            Afficher l'article
+        </a>
+    </p>
+{% endblock %}

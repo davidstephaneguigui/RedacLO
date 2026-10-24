@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block titre %}Inviter un utilisateur — RedacLo{% endblock %}
+
+{% block contenu %}
+    <h2>Inviter un utilisateur</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Envoyer l'invitation</button>
+    </form>
+{% endblock %}

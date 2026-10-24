@@ -1,0 +1,105 @@
+{% load typographie %}
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm 8cm 2cm 2cm; 
+        }
+        
+        body {
+            font-family: Arial, Helvetica, sans-serif; /* Modifié ici */
+            font-size: 12pt;
+            color: #000;
+            line-height: 1.5em; 
+        }
+        
+        .header-info {
+            font-family: system-ui, sans-serif;
+            font-size: 10pt;
+            /* On réduit l'espace sous le bloc d'infos (avant le titre) */
+            margin-bottom: 0.8cm; 
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 0.3cm;
+            line-height: 1.2;
+        }
+        
+        .header-info p { 
+            margin: 0.2cm 0; 
+        }
+        
+        h1 {
+            text-align: left;
+            font-size: 16pt; /* Modifié ici */
+            margin-bottom: 0.3cm;
+            margin-top: 0;
+            line-height: 1.2;
+        }
+        
+        h2 {
+            text-align: left;
+            font-size: 14pt;
+            font-style: italic;
+            font-weight: normal;
+            margin-bottom: 1.5cm;
+            margin-top: 0;
+            line-height: 1.2;
+        }
+        
+        .contenu {
+            text-align: justify;
+            line-height: 2em;
+        }
+        
+        .contenu p, 
+        .contenu div, 
+        .contenu span {
+            line-height: 2em;
+            margin-top: 6pt;
+            margin-bottom: 6pt;
+            text-indent: 0.7cm; 
+        }
+        
+        del { text-decoration: line-through; color: #555; }
+        ins { text-decoration: underline; }
+        
+        .signature {
+            text-align: right;
+            margin-top: 12pt;
+            font-weight: bold;
+            font-size: 11pt;
+            line-height: 1.5em;
+        }
+        
+        i, em {
+            font-style: italic !important;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="header-info">
+        <p><strong>Nombre de signes :</strong> {{ nb_signes }}</p>
+        <p><strong>Version :</strong> {{ label_version }}</p>
+    </div>
+
+    {% if sous_titre %}
+        <h2>{{ sur_titre }}</h2>
+    {% endif %}
+    
+    <h1>{{ titre }}</h1>
+
+    <div class="contenu">
+        {{ contenu|safe }}
+    </div>
+
+    <div class="signature">
+        {{ signature }}
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+
+{% block titre %}{{ titre }} — RedacLo{% endblock %}
+
+{% block contenu %}
+    <h2>{{ titre }}</h2>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <!-- Les champs du formulaire -->       
+        <div style="margin-bottom: 1rem;">
+            {{ form.sur_titre.label_tag }}
+            {{ form.sur_titre }}
+            {{ form.sur_titre.errors }}
+        </div>
+
+        <div style="margin-bottom: 1rem;">
+            {{ form.titre.label_tag }}
+            {{ form.titre }}
+            {{ form.titre.errors }}
+        </div>
+        
+        <div style="margin-bottom: 1rem;">
+            {{ form.type_article.label_tag }}
+            <select name="{{ form.type_article.name }}" id="{{ form.type_article.id_for_label }}" class="form-control">
+                {% for value, label in form.fields.type_article.choices %}
+                    {% if value != "editorial" or user.role == "editorialiste" or user.role == "admin" %}
+                        <option value="{{ value }}" {% if form.type_article.value == value %}selected{% endif %}>{{ label }}</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+            {{ form.type_article.errors }}
+        </div>
+        
+        <div style="margin-bottom: 1rem;">
+            {{ form.contenu.label_tag }}
+            {{ form.contenu }}
+            {{ form.contenu.errors }}
+        </div>
+
+        <div style="margin-top: 2rem; border-top: 1px solid var(--c-border); padding-top: 1rem;">
+            <h3>Images (optionnel)</h3>
+            {{ formset.management_form }}
+
+            {% for image_form in formset %}
+                <div class="image-form-block" style="background: var(--c-surface-alt); padding: 1rem; border-radius: 4px; margin-bottom: 1rem;">
+                    {{ image_form.id }}
+                    
+                    <!-- LIGNE 1 : Fichier avec son label -->
+                        <div style="margin-bottom: 1rem;">
+                            <label style="display: block; margin-bottom: 0.3rem;">{{ image_form.fichier.label_tag }}</label>
+                            
+                            <div class="custom-file-upload">
+                                <!-- Le vrai champ caché -->
+                                <div style="display: none;">
+                                    {{ image_form.fichier }}
+                                </div>
+                                
+                                <!-- Le faux bouton stylisé -->
+                                <label for="{{ image_form.fichier.id_for_label }}" class="btn btn-secondary btn-sm" style="cursor: pointer;">
+                                    📁 Choisir une image
+                                </label>
+                                
+                                <!-- Le texte qui affichera le nom du fichier -->
+                                <span class="file-name-display" style="color: var(--c-text-muted); font-size: 0.85rem; margin-left: 0.5rem; font-style: italic;">
+                                    Aucun fichier sélectionné
+                                </span>
+                            </div>
+                        </div>
+                    
+                    <!-- LIGNE 2 : Légende -->
+                    <div style="margin-bottom: 0.8rem;">
+                        {{ image_form.legende.label_tag }} 
+                        {{ image_form.legende }}
+                    </div>
+                    
+                    <!-- LIGNE 3 : Case photo prise par l'auteur -->
+                    <div style="margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.6rem;">
+                        {{ image_form.est_prise_par_redacteur }} 
+                        <label for="{{ image_form.est_prise_par_redacteur.id_for_label }}" style="margin-bottom: 0; font-weight: normal; cursor: pointer;">
+                            C'est bien moi qui ai pris cette photo
+                        </label>
+                    </div>
+
+                    <!-- LIGNE 4 : Case droits -->
+                    <div style="margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.6rem;">
+                        {{ image_form.droits_ok }} 
+                        <label for="{{ image_form.droits_ok.id_for_label }}" style="margin-bottom: 0; font-weight: normal; cursor: pointer;">
+                            Je certifie que nous avons les droits d'utilisation
+                        </label>
+                    </div>
+
+                    <!-- LIGNE 5 : L'alerte (cachée par défaut) -->
+                    <div class="alerte-droits" style="display: none; color: var(--c-danger); font-size: 0.85rem; font-weight: bold; margin-bottom: 0.8rem;">
+                        ⚠️ Attention : nous n'avons pas la certitude que nous pouvons utiliser cette photo. Il est préférable de ne pas la charger.
+                    </div>
+
+                    <!-- LIGNE 6 : Suppression -->
+                    {% if image_form.DELETE %}
+                        <div style="margin-top: 1rem; display: flex; align-items: center; gap: 0.6rem;">
+                            {{ image_form.DELETE }} 
+                            <label for="{{ image_form.DELETE.id_for_label }}" style="margin-bottom: 0; font-weight: normal; cursor: pointer;">
+                                Supprimer cette image
+                            </label>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Les boutons d'action -->
+        <div class="form-actions" style="margin-top: 2rem;">
+            <button type="submit" class="btn btn-primary">Enregistrer</button>
+            
+            <!-- Bouton Annuler : renvoie vers l'article si on modifie, sinon vers la liste -->
+            {% if form.instance.pk %}
+                <a href="{% url 'articles:detail_article' form.instance.pk %}" class="btn btn-secondary">Annuler la modification</a>
+            {% else %}
+                <a href="{% url 'articles:mes_articles' %}" class="btn btn-secondary">Annuler</a>
+            {% endif %}
+            
+            <!-- Bouton Retour aligné à droite (seulement en modification) -->
+            {% if form.instance.pk %}
+                <a href="{% url 'articles:mes_articles' %}" class="btn btn-ghost" style="margin-left: auto;">
+                    Retour à mes articles
+                </a>
+            {% endif %}
+        </div>
+    </form>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const blocsImages = document.querySelectorAll(".image-form-block");
+
+            blocsImages.forEach(function(bloc) {
+                // On récupère les IDs dynamiques générés par Django
+                const inputFichier = bloc.querySelector('input[type="file"]');
+                const checkAuteur = bloc.querySelector('input[name$="-est_prise_par_auteur"]');
+                const checkDroits = bloc.querySelector('input[name$="-droits_ok"]');
+                const alerte = bloc.querySelector(".alerte-droits");
+                const fileDisplay = bloc.querySelector(".file-name-display"); // NOUVEAU : pour le nom du fichier
+
+                if (inputFichier) {
+                    
+                    // 1. GESTION DU NOM DU FICHIER
+                    if (fileDisplay) {
+                        inputFichier.addEventListener("change", function() {
+                            if (inputFichier.files.length > 0) {
+                                fileDisplay.textContent = inputFichier.files[0].name;
+                                fileDisplay.style.color = "var(--c-text)";
+                                fileDisplay.style.fontStyle = "normal";
+                            } else {
+                                fileDisplay.textContent = "Aucun fichier sélectionné";
+                                fileDisplay.style.color = "var(--c-text-muted)";
+                                fileDisplay.style.fontStyle = "italic";
+                            }
+                        });
+                    }
+
+                    // 2. GESTION DE L'ALERTE DES DROITS
+                    if (checkAuteur && checkDroits && alerte) {
+                        function verifierDroits() {
+                            if (inputFichier.files.length > 0 && !checkAuteur.checked && !checkDroits.checked) {
+                                alerte.style.display = "block";
+                            } else {
+                                alerte.style.display = "none";
+                            }
+                        }
+
+                        checkAuteur.addEventListener("change", verifierDroits);
+                        checkDroits.addEventListener("change", verifierDroits);
+                        inputFichier.addEventListener("change", verifierDroits);
+                    }
+                }
+            });
+        });
+    </script>
+{% endblock %}

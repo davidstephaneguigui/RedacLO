@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block titre %}Modifier ma version — {{ article.titre }}{% endblock %}
+
+{% block contenu %}
+    <h2>Modifier ma version</h2>
+
+    <p><strong>Article :</strong> {{ article.titre }}</p>
+    <p>
+        <strong>Version :</strong> v{{ version.numero }}
+        ({{ version.get_type_display }}) —
+        statut : <span class="statut-{{ version.statut }}">{{ version.get_statut_display }}</span>
+    </p>
+
+    <p class="aide">
+        Modifiez le texte ci-dessous. Les modifications remplacent
+        le contenu de cette version.
+    </p>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="champ-version">
+            <label for="{{ form.contenu.id_for_label }}">Texte de la version :</label>
+            {{ form.contenu }}
+        </div>
+
+        <div class="champ-version">
+            <label for="{{ form.commentaire.id_for_label }}">Commentaire (facultatif) :</label>
+            {{ form.commentaire }}
+        </div>
+
+        <p>
+            <button type="submit">Enregistrer</button>
+            <a href="{% url 'articles:annoter_article_avec_version' article.pk version.pk %}">
+                Annuler
+            </a>
+        </p>
+    </form>
+{% endblock %}

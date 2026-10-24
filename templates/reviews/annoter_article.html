@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% load static %}
+{% load typographie %}
+
+{% block titre %}Annoter — {{ article.titre }}{% endblock %}
+
+{% block contenu %}
+
+    <div style="margin-bottom: 2rem;">
+        <h2>{{ article.titre }}</h2>
+        <p class="source-texte">
+            <strong>Auteur :</strong> {{ article.auteur.get_signature }} | 
+            <strong>Statut global :</strong> 
+            <span class="statut-{{ article.statut }}">{{ article.get_statut_display }}</span>
+        </p>
+    </div>
+
+    {% if versions.count > 1 %}
+        <form method="get" action="{% url 'articles:annoter_article' article.pk %}" class="selecteur-version">
+            <label for="version">Version à afficher :</label>
+            <select name="version" id="version" onchange="this.form.submit()">
+                {% for v in versions %}
+                    <option value="{{ v.pk }}" {% if version and v.pk == version.pk %}selected{% endif %}>
+                        {% if v.numero == 0 %}
+                            Version initiale (Brouillon)
+                        {% elif v.type == "redacteur" and v.statut == "soumise" %}
+                            Version initiale (Envoyée)
+                        {% elif v.statut == "validee" %}
+                            Version validée (v{{ v.numero }} par {{ v.auteur_modification.username }})
+                        {% elif v.statut == "rejetee" %}
+                            Version rejetée (v{{ v.numero }} par {{ v.auteur_modification.username }})
+                        {% else %}
+                            Version de relecture (v{{ v.numero }} par {{ v.auteur_modification.username }})
+                        {% endif %}
+                    </option>
+                {% endfor %}
+            </select>
+            <noscript><button type="submit">Afficher</button></noscript>
+        </form>
+    {% endif %}
+
+    {% if version %}
+        <h3>Version v{{ version.numero }} ({{ version.get_type_display }})</h3>
+        <p class="meta-version">
+            {% if version.auteur_modification %}
+                Par {{ version.auteur_modification.username }} —
+            {% endif %}
+            le {{ version.date|date:"d/m/Y à H:i" }}
+             — <span class="statut-{{ version.statut }}">{{ version.get_statut_display }}</span>
+             — <strong>{{ version.nombre_signes }} signes</strong>
+        </p>
+
+        <p class="bascule-mode">
+            {% if mode == "diff" %}
+                Mode actuel : <strong>différences</strong> —
+                <a href="?version={{ version.pk }}">Voir le texte propre</a>
+            {% else %}
+                Mode actuel : <strong>texte propre</strong> —
+                <a href="?version={{ version.pk }}&mode=diff">Voir les différences</a>
+            {% endif %}
+        </p>
+
+        {% if version.commentaire %}
+            <p><em>Commentaire : {{ version.commentaire }}</em></p>
+        {% endif %}
+
+        <div class="texte-version">{{ texte_affiche|safe }}</div>
+    {% else %}
+        <p><em>Aucune version disponible pour cet article.</em></p>
+    {% endif %}
+
+    <hr>
+
+    <div class="actions" style="margin-top: 2rem; border-top: 1px solid var(--c-border); padding-top: 1.5rem;">
+        
+        <!-- 1. BOUTON DE CRÉATION DE VERSION -->
+        {% if user.role == "relecteur" or user.role == "editeur" or user.role == "admin" %}
+            {% if article.statut == "valide" %}
+                <span style="color: var(--c-text-muted); font-size: 0.9rem; font-style: italic;">
+                    L'article est validé. Dévalidez une version pour pouvoir en créer une nouvelle.
+                </span>
+            {% else %}
+                <a href="{% url 'articles:choisir_base_relecture' article.pk %}" class="btn btn-primary">
+                    Créer ma version de relecture
+                </a>
+            {% endif %}
+        {% endif %}
+
+        <!-- 2. ACTIONS SUR LA VERSION AFFICHÉE -->
+        {% if version %}
+            {% if version_modifiable %}
+                <a href="{% url 'articles:modifier_version' article.pk version.pk %}" class="btn btn-secondary">
+                    Modifier ma version
+                </a>
+                {% if version.statut == "brouillon" %}
+                    <form method="post" action="{% url 'articles:soumettre_version' article.pk version.pk %}" style="display:inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary">Soumettre ma version</button>
+                    </form>
+                {% endif %}
+            {% endif %}
+
+            {% if version_supprimable %}
+                <form method="post" action="{% url 'articles:supprimer_version' article.pk version.pk %}" style="display:inline" onsubmit="return confirm('Supprimer cette version ? Cette action est irréversible.');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Supprimer ma version</button>
+                </form>
+            {% endif %}
+
+            <a href="{% url 'articles:telecharger_pdf_version' article.pk version.pk %}" class="btn btn-secondary">
+                Imprimer la version (PDF)
+            </a>
+        {% endif %}
+
+        <!-- 3. BOUTONS DE RETOUR -->
+        {% if user.est_redacteur %}
+            <a href="{% url 'articles:mes_articles' %}" class="btn btn-ghost">Retour à mes articles</a>
+        {% else %}
+            <a href="{% url 'reviews:a_relire' %}" class="btn btn-ghost">Retour à la liste</a>
+        {% endif %}
+        
+    </div>
+{% endblock %}

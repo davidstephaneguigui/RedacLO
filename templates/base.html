@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <title>{% block titre %}RedacLo{% endblock %}</title>
+        <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    </head>
+    <body>
+        <header>
+            <!-- Ligne du haut : Titre et message de bienvenue -->
+            <div class="header-top">
+                <h1 class="site-title">
+                    <a href="{% url 'core:accueil' %}">RedacLo</a>
+                </h1>
+                {% if user.is_authenticated %}
+                    <span class="user-greeting">
+                        Bonjour {{ user.username }} ({{ user.get_role_display }})
+                    </span>
+                {% endif %}
+            </div>       
+
+            <!-- Menu de navigation -->
+            <nav class="menu">
+                <a href="{% url 'core:accueil' %}" class="btn btn-ghost {% if request.resolver_match.url_name == 'accueil' %}active{% endif %}">Accueil</a>
+                <a href="{% url 'articles:mes_articles' %}" class="btn btn-ghost {% if request.resolver_match.url_name == 'mes_articles' or request.resolver_match.url_name == 'detail_article' or request.resolver_match.url_name == 'creer_article' or request.resolver_match.url_name == 'modifier_article' %}active{% endif %}">Articles</a>
+                
+                {% if user.role == "editeur" or user.role == "membre_redaction" or user.role == "admin" %}
+                    <a href="{% url 'reviews:a_relire' %}" class="btn btn-ghost {% if request.resolver_match.url_name == 'a_relire' or request.resolver_match.url_name == 'liste_versions' or request.resolver_match.url_name == 'annoter_article' or request.resolver_match.url_name == 'annoter_article_avec_version' %}active{% endif %}">Relire</a>
+                    <a href="{% url 'articles:choisir' %}" class="btn btn-ghost {% if request.resolver_match.url_name == 'choisir' %}active{% endif %}">Choisir</a>
+                    <a href="{% url 'articles:articles_reserves' %}" class="btn btn-ghost {% if request.resolver_match.url_name == 'articles_reserves' %}active{% endif %}">Réserver</a>
+                    <a href="{% url 'publications:composition' %}" class="btn btn-ghost {% if request.resolver_match.url_name == 'composition' %}active{% endif %}">Composer</a>
+                    <a href="{% url 'publications:organiser_index' %}" class="btn btn-ghost {% if request.resolver_match.url_name == 'organiser_index' or request.resolver_match.url_name == 'organiser_page' %}active{% endif %}">Organiser</a>
+                {% endif %}
+            </nav>
+
+        <!-- Affichage des messages d'erreur et de succès -->
+        {% if messages %}
+            <div style="padding: 0 2rem; margin-top: 1rem;">
+                {% for message in messages %}
+                    <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}" 
+                        style="padding: 1rem; border-radius: 4px; margin-bottom: 1rem; 
+                                background-color: {% if message.tags == 'error' %}#ffebee{% elif message.tags == 'success' %}#e8f5e9{% else %}#e3f2fd{% endif %}; 
+                                color: {% if message.tags == 'error' %}#c62828{% elif message.tags == 'success' %}#2e7d32{% else %}#1565c0{% endif %}; 
+                                border: 1px solid {% if message.tags == 'error' %}#f44336{% elif message.tags == 'success' %}#4caf50{% else %}#2196f3{% endif %};">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}    
+
+        <main class="{% block main_class %}{% endblock %}">
+            {% block contenu %}{% endblock %}
+        </main>
+
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li class="message {{ message.tags }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        
+        <footer>
+            <p>Projet RedacLo</p>
+        </footer>
+        
+        <!-- Il ne doit y avoir qu'UN SEUL bloc scripts ici -->
+        {% block scripts %}{% endblock %}
+        
+        <!-- Script pour le menu burger -->
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                const burgerBtn = document.getElementById("burger-btn");
+                const navLinks = document.getElementById("nav-links");
+
+                if (burgerBtn && navLinks) {
+                    // 1. Clic sur le bouton : on ouvre/ferme le menu
+                    burgerBtn.addEventListener("click", function(event) {
+                        event.stopPropagation(); 
+                        navLinks.classList.toggle("active");
+                    });
+
+                    // 2. Clic n'importe où ailleurs sur la page : on ferme le menu
+                    document.addEventListener("click", function(event) {
+                        if (navLinks.classList.contains("active") && 
+                            !navLinks.contains(event.target) && 
+                            !burgerBtn.contains(event.target)) {
+                            navLinks.classList.remove("active");
+                        }
+                    });
+                }
+            });
+        </script>
+    </body>
+</html>

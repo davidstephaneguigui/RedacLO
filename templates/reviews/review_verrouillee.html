@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block titre %}Relecture déjà déposée — RedacLo{% endblock %}
+
+{% block contenu %}
+    <h2>Relecture déjà déposée</h2>
+    <p>Vous avez déjà déposé une relecture pour cet article. Elle n'est plus modifiable.</p>
+    <p><a href="{% url 'articles:detail_article' review.article.pk %}">Voir l'article</a></p>
+{% endblock %}

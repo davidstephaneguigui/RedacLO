@@ -1,0 +1,8 @@
+{% if user.is_authenticated %}
+    <a href="{% url 'core:notifications' %}" class="cloche" title="Notifications">
+        <span class="cloche-icone">🔔</span>
+        {% if notifications_non_lues > 0 %}
+            <span class="cloche-badge">{{ notifications_non_lues }}</span>
+        {% endif %}
+    </a>
+{% endif %}

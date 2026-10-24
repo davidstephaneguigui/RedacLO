@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block titre %}Créer mon compte — RedacLo{% endblock %}
+
+{% block contenu %}
+    <h2>Créer mon compte</h2>
+    <p>Bienvenue ! Vous avez été invité avec le rôle : <strong>{{ invitation.get_role_display }}</strong>.</p>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Créer mon compte</button>
+    </form>
+{% endblock %}

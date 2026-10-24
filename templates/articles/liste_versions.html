@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block titre %}Versions — {{ article.titre }}{% endblock %}
+
+{% block contenu %}
+    <h2>Versions de : {{ article.titre }}</h2>
+
+    <!-- CORRECTION : article.redacteur au lieu de article.auteur -->
+    <p><strong>Rédacteur :</strong> {{ article.redacteur.get_signature }}</p>
+    <p><strong>Statut de l'article :</strong> 
+        {% if article.statut == 'valide_1_fois' %}
+            <span class="badge" style="background-color: #fff3cd; color: #856404; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: bold;">
+                Validé (1/2) - En attente du 2ème éditeur
+            </span>
+        {% elif article.statut == 'relu' %}
+            <span class="badge" style="background-color: #e1bee7; color: #4a148c; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: bold;">
+                Relu (à trancher)
+            </span>
+        {% elif article.statut == 'valide' %}
+            <span class="badge" style="background-color: #d4edda; color: #155724; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: bold;">
+                Validé (2/2) - Prêt pour la composition
+            </span>
+        {% else %}
+            <span class="statut-{{ article.statut }}">{{ article.get_statut_display }}</span>
+        {% endif %}
+    </p>
+
+    <h3>Liste des versions</h3>
+
+    {% if versions %}
+        <table class="table-liste table-responsive-cards">
+            <thead>
+                <tr>
+                    <th style="width: 8%; text-align: left;">N°</th>
+                    <th style="width: 12%; text-align: left;">Rédacteur</th>
+                    <th style="width: 13%; text-align: left;">Date</th>
+                    <th style="width: 5%; text-align: left;">Signes</th>
+                    <th style="width: 15%; text-align: left;">Statut</th>
+                    <th style="width: 25%; text-align: left;">Actions</th>
+                    <th style="width: 22%; text-align: left;">Commentaires</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for v in versions %}
+                    <tr>
+                        <td data-label="N°" style="text-indent: 0; padding-left: 1rem; text-align: left;">
+                            v{{ v.numero }}
+                            {% if version_reference and v.pk == version_reference.pk %}
+                                <span class="badge-finale" style="margin-left: 0.5rem;">réf.</span>
+                            {% endif %}
+                        </td>
+                        <td data-label="Rédacteur">
+                            {% if v.modifie_par %}
+                                {{ v.modifie_par.username }}
+                            {% else %}
+                                —
+                            {% endif %}
+                        </td>
+                        <td data-label="Date">{{ v.date|date:"d/m/Y H:i" }}</td>
+                        <td data-label="Signes">{{ v.nombre_signes }}</td>
+                        <td data-label="Statut">
+                            {% if v.statut == "validee" and article.statut == "valide_1_fois" %}
+                                <span class="badge" style="background-color: #fff3cd; color: #856404; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: bold;">
+                                    Validée (1/2)
+                                </span>
+                            {% elif v.statut == "validee" and article.statut == "valide" %}
+                                <span class="badge" style="background-color: #d4edda; color: #155724; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: bold;">
+                                    Validée (2/2)
+                                </span>
+                            {% else %}
+                                <span class="statut-{{ v.statut }}">
+                                    {{ v.get_statut_display }}
+                                </span>
+                            {% endif %}
+                        </td>
+                        
+                        <!-- ACTIONS -->
+                        <td data-label="Actions">
+                            <div class="actions-table" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                                
+                                <!-- Boutons de base -->
+                                <div style="display: flex; gap: 0.5rem;">
+                                    <a href="{% url 'articles:annoter_article_avec_version' article.pk v.pk %}" class="btn btn-sm btn-ghost">Relire l'article</a>
+                                    <a href="{% url 'articles:telecharger_pdf_version' article.pk v.pk %}" class="btn btn-sm btn-secondary">Imprimer</a>
+                                </div>
+
+                                <!-- LE BOUTON DE VALIDATION FORCÉ -->
+                                {% if v.type == "relecture" and v.statut != "rejetee" and v.statut != "brouillon" %}
+                                    {% if article.statut == 'relu' or article.statut == 'soumis' or article.statut == 'en_relecture' %}
+                                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                            <form method="post" action="{% url 'articles:valider_version' article.pk v.pk %}" style="display:flex; gap: 0.5rem; margin: 0;">
+                                                {% csrf_token %}
+                                                <select name="au_nom_de" style="font-size:0.85rem; padding:0.2rem; max-width: 150px; border-radius: 4px; border: 1px solid #ccc;">
+                                                    <option value="">Pour moi-même</option>
+                                                    {% for editeur in editeurs %}
+                                                        <option value="{{ editeur.pk }}">Au nom de {{ editeur.username }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                                <button type="submit" class="btn btn-sm btn-primary">✅ Valider (1/2)</button>
+                                            </form>
+                                            <form method="post" action="{% url 'articles:rejeter_version' article.pk v.pk %}" style="margin: 0;" onsubmit="var c = prompt('Motif du rejet :'); if (!c) return false; this.commentaire.value = c;">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="commentaire" value="">
+                                                <button type="submit" class="btn btn-sm btn-danger-solid">Rejeter</button>
+                                            </form>
+                                        </div>
+                                    {% elif article.statut == 'valide_1_fois' %}
+                                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                                            <span style="font-size: 0.85rem; color: #856404; font-weight: 500; width: 100%;">
+                                                Déjà validé par : {{ article.valide_1_par.username }}
+                                            </span>
+                                            <form method="post" action="{% url 'articles:valider_version' article.pk v.pk %}" style="display:flex; gap: 0.5rem; margin: 0;">
+                                                {% csrf_token %}
+                                                <select name="au_nom_de" style="font-size:0.85rem; padding:0.2rem; max-width: 150px; border-radius: 4px; border: 1px solid #ccc;">
+                                                    <option value="">Pour moi-même</option>
+                                                    {% for editeur in editeurs %}
+                                                        {% if editeur != article.valide_1_par %}
+                                                            <option value="{{ editeur.pk }}">Au nom de {{ editeur.username }}</option>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </select>
+                                                <button type="submit" class="btn btn-sm btn-success">✅ Valider (2/2)</button>
+                                            </form>
+                                        </div>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                        </td>
+
+                        <!-- COMMENTAIRES -->
+                        <td data-label="Commentaires" style="font-size: 0.85rem; color: var(--c-text-muted);">
+                            {{ v.commentaire|default:"—" }}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>Aucune version pour cet article.</p>
+    {% endif %}
+
+    <div class="actions" style="margin-top: 2rem; border-top: 1px solid var(--c-border); padding-top: 1.5rem;">
+        <a href="{% url 'reviews:a_relire' %}" class="btn btn-ghost">Retour à la liste</a>
+        <a href="{% url 'articles:detail_article' article.pk %}" class="btn btn-ghost">Voir la fiche article</a>
+    </div>
+{% endblock %}

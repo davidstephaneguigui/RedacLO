@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block titre %}Invitation envoyée — RedacLo{% endblock %}
+
+{% block contenu %}
+    <h2>Invitation envoyée</h2>
+    <p>Un courriel a été envoyé à <strong>{{ email }}</strong>.</p>
+
+    <h3>Lien d'invitation (mode développement)</h3>
+    <p>En production, ce lien serait uniquement dans le courriel. En développement, il est affiché ici pour faciliter les tests :</p>
+    <p><a href="{{ lien }}">{{ lien }}</a></p>
+
+    <p><a href="{% url 'accounts:inviter' %}">Inviter une autre personne</a></p>
+{% endblock %}

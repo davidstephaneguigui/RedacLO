@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block titre %}Accueil — RedacLo{% endblock %}
+
+{% block contenu %}
+    
+    {% if user.is_authenticated %}
+
+        <!-- 1. BLOC POUR LES UTILISATEURS CONNECTÉS    -->
+        <h2>Bienvenue sur RedacLo</h2>
+        <p>Vous êtes connecté en tant que <b>{{ user.username }}</b> ({{ user.get_role_display }}).</p>
+
+        <!-- Présentation selon le rôle -->
+        {% if user.role == "redacteur" %}
+            {% include "core/presentations/auteur.html" %}
+        {% elif user.role == "editeur" %}
+            {% include "core/presentations/editeur.html" %}
+        {% elif user.role == "admin" %}
+            {% include "core/presentations/admin.html" %}
+        {% endif %}
+
+        <!-- Notifications -->
+        <section class="notifications-accueil">
+            {% if notifications_total_non_lues > 0 %}
+                <p class="ligne-notification">
+                    <a href="{% url 'core:notifications' %}">
+                        {% if notifications_total_non_lues > 1 %}
+                            Vous avez {{ notifications_total_non_lues }} notifications non lues.
+                        {% else %}
+                            Vous avez une notification non lue.
+                        {% endif %}
+                    </a>
+                </p>
+            {% else %}
+                <p class="ligne-notification"><b>Aucune notification non lue.</b></p>
+            {% endif %}
+        </section>
+
+    {% else %}
+
+        <!-- 2. BLOC POUR LES VISITEURS NON CONNECTÉS   -->
+     
+        <div style="text-align: center; margin: 3rem 0;">
+            <h2 style="color: var(--c-primary);">Bienvenue sur RedacLo</h2>
+            <p style="margin-bottom: 2rem; color: var(--c-text-muted); font-size: 1.1rem;">
+                Vous souhaitez nous proposer un texte ? <br>
+                Pas besoin de créer un compte à l'avance, remplissez simplement le formulaire.
+            </p>
+            
+            <a href="{% url 'articles:soumettre_public' %}" class="btn btn-primary" style="font-size: 1.1rem; padding: 1rem 2rem;">
+                Proposer un article
+            </a>
+            
+            <p style="margin-top: 3rem; color: var(--c-text-muted); font-size: 0.9rem;">
+                Déjà membre de la rédaction ? <a href="{% url 'login' %}">Connectez-vous ici</a>.
+            </p>
+        </div>
+
+    {% endif %}
+
+{% endblock %}

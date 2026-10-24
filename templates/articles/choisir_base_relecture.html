@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block titre %}Créer une version — {{ article.titre }}{% endblock %}
+
+{% block contenu %}
+    <h2>Créer une version de relecture</h2>
+    <p class="source-texte">Pour l'article : <strong>{{ article.titre }}</strong></p>
+
+    <div class="message-avertissement" style="margin: 2rem 0; padding: 1.5rem; border-left: 5px solid var(--c-warning); background: var(--c-warning-soft);">
+        <h3>⚠️ Vous avez déjà une version de relecture</h3>
+        <p>Vous avez déjà créé la version <strong>v{{ ma_version.numero }}</strong> pour cet article.</p>
+        
+        {% if ma_version.statut == "brouillon" %}
+            <p>Que souhaitez-vous faire ?</p>
+        {% else %}
+            <p>Cette version est actuellement au statut <strong>{{ ma_version.get_statut_display }}</strong>. Vous ne pouvez plus la modifier.</p>
+        {% endif %}
+    </div>
+
+    <div class="actions" style="display: flex; gap: 1rem;">
+        <!-- Option 1 : Reprendre sa version (UNIQUEMENT si elle est en brouillon) -->
+        {% if ma_version.statut == "brouillon" %}
+            <a href="{% url 'articles:modifier_version' article.pk ma_version.pk %}" class="btn btn-primary">
+                Repartir de ma version existante (v{{ ma_version.numero }})
+            </a>
+        {% endif %}
+        
+        <!-- Option 2 : Repartir de zéro -->
+        <a href="{% url 'articles:creer_version_relecture' article.pk %}" class="btn btn-secondary">
+            Recommencer à partir de la version initiale
+        </a>
+    </div>
+    
+    <p style="margin-top: 2rem;">
+        <a href="{% url 'articles:annoter_article' article.pk %}" class="btn-lien">Annuler et revenir à l'article</a>
+    </p>
+{% endblock %}

@@ -1,0 +1,21 @@
+# Environnement virtuel
+.venv/
+venv/
+
+# Base de données
+*.sqlite3
+
+# Python
+__pycache__/
+*.py[cod]
+
+# Configuration sensible
+.env
+
+# Médias et statiques
+media/
+staticfiles/
+
+# IDE
+.vscode/
+.idea/

@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% load url_utils %}
+
+{% block titre %}Mes articles — RedacLo{% endblock %}
+
+{% block contenu %}
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h2 style="margin: 0;">Mes articles</h2>
+        <a href="{% url 'articles:creer_article' %}" class="btn btn-primary">Nouvel article</a>
+    </div>
+
+    {% if articles %}
+        <table class="table-liste table-responsive-cards">
+            <thead>
+                <tr>
+                    <th style="width: 30%; text-align: left;">Titre</th>
+                    <th style="width: 8%; text-align: left;">Type</th>
+                    <th style="width: 15%; text-align: left;">Rédacteur</th>
+                    <th style="width: 10%; text-align: left;">
+                        <a href="?{% url_tri 'relectures' tri_courant %}">
+                            Relectures
+                            {% if tri_courant == 'relectures' %}▲{% elif tri_courant == '-relectures' %}▼{% endif %}
+                        </a>
+                    </th>
+                    {% if user.role == "editeur" or user.role == "admin" %}
+                        <th style="width: 8%; text-align: left;">Versions</th>
+                    {% endif %}
+                    <th style="width: 10%; text-align: left;">
+                        <a href="?{% url_tri 'statut' tri_courant %}">
+                            Statut
+                            {% if tri_courant == 'statut' %}▲{% elif tri_courant == '-statut' %}▼{% endif %}
+                        </a>
+                    </th>
+                    <th style="width: 12%; text-align: left;">
+                        <a href="?{% url_tri 'date' tri_courant %}">
+                            Date
+                            {% if tri_courant == 'date' %}▲{% elif tri_courant == '-date' %}▼{% endif %}
+                        </a>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for article in articles %}
+                    <tr>
+                        <!-- 1. TITRE -->
+                        <td data-label="Titre" style="cursor: pointer;" onclick="window.location='{% url 'articles:detail_article' article.pk %}';">
+                            <span style="color: #0056b3; text-decoration: none; font-weight: 500;">
+                                {{ article.titre }}
+                            </span>
+                        </td>
+
+                        <!-- 2. TYPE -->
+                        <td data-label="Type">
+                            <div class="cellule-interne text-muted">
+                                {{ article.get_type_article_display }}
+                            </div>
+                        </td>
+
+                        <!-- 3. RÉDACTEUR -->
+                        <td data-label="Rédacteur">
+                            <div class="cellule-interne text-right-mobile">
+                                <span class="texte-tronque" style="font-weight: 500;">{{ article.redacteur.get_signature }}</span>
+                            </div>
+                        </td>
+
+                        <!-- 4. RELECTURES -->
+                        <td data-label="Relectures">
+                            <div class="cellule-interne {{ article.couleur_info_relectures }}" style="font-weight: 600;">
+                                {{ article.info_relectures }}
+                            </div>
+                        </td>
+
+                        <!-- 5. VERSIONS (Conditionnel comme dans le thead !) -->
+                        {% if user.role == "editeur" or user.role == "admin" %}
+                        <td data-label="Versions">
+                            <div class="actions-table" style="justify-content: center;">
+                                <a href="{% url 'articles:detail_article' article.pk %}" class="btn btn-sm btn-secondary">
+                                    Voir
+                                </a>
+                            </div>
+                        </td>
+                        {% endif %}
+
+                        <!-- 6. STATUT -->
+                        <td data-label="Statut">
+                            <div class="cellule-interne">
+                                <span class="statut-{{ article.statut }}">
+                                    {{ article.get_statut_display }}
+                                </span>
+                            </div>
+                        </td>
+
+                        <!-- 7. DATE -->
+                        <td data-label="Date">
+                            <div class="cellule-interne" style="white-space: nowrap;">
+                                {{ article.date_modification|date:"d/m/Y à H:i" }}
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% include '_pagination.html' %}
+    {% else %}
+        <p>Vous n'avez pas encore rédigé d'article.</p>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,20 @@
+{% load url_utils %}
+{% if page_obj.has_other_pages %}
+<nav class="pagination" aria-label="Pagination">
+    <span class="pagination-info">
+        Affichage de {{ page_obj.start_index }} à {{ page_obj.end_index }}
+        sur {{ page_obj.paginator.count }} article{{ page_obj.paginator.count|pluralize }}
+    </span>
+    <div class="pagination-links">
+        {% if page_obj.has_previous %}
+            <a href="?{% url_page 1 %}" class="btn btn-ghost btn-sm">&laquo; Première</a>
+            <a href="?{% url_page page_obj.previous_page_number %}" class="btn btn-secondary btn-sm">&lsaquo; Précédente</a>
+        {% endif %}
+        <span class="pagination-current">Page {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+            <a href="?{% url_page page_obj.next_page_number %}" class="btn btn-secondary btn-sm">Suivante &rsaquo;</a>
+            <a href="?{% url_page page_obj.paginator.num_pages %}" class="btn btn-ghost btn-sm">Dernière &raquo;</a>
+        {% endif %}
+    </div>
+</nav>
+{% endif %}

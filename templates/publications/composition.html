@@ -1,0 +1,347 @@
+{% extends "base.html" %}
+
+{% block main_class %}main-large{% endblock %}
+{% block titre %}Chemin de fer — RedacLo{% endblock %}
+
+{% block contenu %}
+    
+    <!-- 1. L'EN-TÊTE -->
+    <div style="margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid #e0e0e0;">
+        <h2 style="margin: 0 0 0.5rem 0; font-size: 1.5rem; color: #333;">Chemin de fer : n° {{ numero.numero }}</h2>
+        <p style="font-style: italic; color: #666; margin: 0 0 1rem 0;">
+            Semaine n°{{ numero_semaine }}, {{ dates_semaine }}
+        </p>
+        <div style="display: flex; justify-content: flex-start; align-items: center; gap: 1rem;">
+            <a href="{% url 'articles:choisir' %}" class="btn btn-secondary">&larr; Retour aux articles à choisir</a>
+            
+            <!-- LE BOUTON POUR AFFICHER OU MASQUER LE VIVIER -->
+            <button type="button" class="btn btn-primary" id="btn-toggle-vivier" onclick="toggleVivier()">
+                {% if articles %}Masquer le vivier{% else %}Afficher le vivier{% endif %}
+            </button>
+        </div>
+    </div>
+
+    <!-- LE FORMULAIRE GLOBAL VIDE (qui va recevoir les cases à cocher) -->
+    <form id="form-selection" method="post" action="{% url 'publications:renvoyer_a_selection' %}">
+        {% csrf_token %}
+    </form>
+
+    <!-- 2. LA BARRE D'ACTIONS ET COMPTEURS SUR UNE SEULE LIGNE -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; background: #f8f9fa; padding: 1rem; border-radius: 8px; border: 1px solid #e0e0e0;">
+        
+        <!-- Boutons d'action à gauche -->
+        <div id="actions-vivier" style="display: flex; gap: 0.5rem; align-items: center;">
+            <!-- LA CASE TOUT SÉLECTIONNER -->
+            <label style="display: flex; align-items: center; gap: 0.5rem; margin-right: 1rem; cursor: pointer; font-weight: bold;">
+                <input type="checkbox" id="select-all-composer" style="transform: scale(1.3);">
+                Tout sélectionner
+            </label>
+
+            <button type="submit" form="form-selection" name="action" value="renvoyer" class="btn btn-warning" onclick="return confirm('Renvoyer les articles sélectionnés vers la page Choisir ?');">
+                &larr; Renvoyer vers Choisir
+            </button>
+            <button type="submit" form="form-selection" name="action" value="reserver" class="btn btn-secondary" onclick="return confirm('Réserver les articles sélectionnés pour les numéros suivants ?');">
+                📌 Réserver
+            </button>
+        </div>
+
+        <!-- Compteurs à droite -->
+        <div style="display: flex; gap: 1rem; margin-left:auto">
+            <div style="background: #fff3cd; padding: 0.4rem 1rem; border-radius: 8px; border: 1px solid #ffeeba; text-align: center;">
+                <span style="display: block; font-size: 0.7rem; color: #856404; text-transform: uppercase;">Dans le vivier</span>
+                <strong style="font-size: 1rem; color: #856404;">{{ signes_vivier }} signes</strong>
+            </div>
+            <div style="background: #e3f2fd; padding: 0.4rem 1rem; border-radius: 8px; border: 1px solid #90caf9; text-align: center;">
+                <span style="display: block; font-size: 0.7rem; color: #1565c0; text-transform: uppercase;">Placés sur les pages</span>
+                <strong style="font-size: 1rem; color: #1565c0;">{{ signes_places }} / {{ capacite_totale }}</strong>
+            </div>
+            <div style="background: #e8f5e9; padding: 0.4rem 1rem; border-radius: 8px; border: 1px solid #a5d6a7; text-align: center;">
+                <span style="display: block; font-size: 0.7rem; color: #2e7d32; text-transform: uppercase;">Reste à placer</span>
+                <strong style="font-size: 1rem; color: #2e7d32;">{{ signes_restants }} signes</strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. LE FORMULAIRE GLOBAL (englobe le vivier et la maquette) -->
+    <div class="layout-composition" style="display: flex; gap: 2rem; align-items: flex-start;">  
+
+        <!-- ========================================== -->
+        <!-- COLONNE GAUCHE : LE VIVIER                 -->
+        <!-- ========================================== -->
+        <div class="vivier" id="vivier-container" style="display: {% if articles %}block{% else %}none{% endif %}; flex: 1; min-width: 250px; background: #fff; padding: 1.5rem; border-radius: 8px; border: 1px solid #e0e0e0;">
+            <h3 style="margin-top: 0;">📚 Articles à placer</h3>
+            
+            {% for article in articles %}
+                <div class="carte-article" style="display: flex; gap: 0.5rem; margin-bottom: 1rem; border-bottom: 1px solid #eee; padding-bottom: 1rem;">
+                    
+                    <!-- CASE À COCHER (liée au formulaire global en haut) -->
+                    <input type="checkbox" name="article_ids" value="{{ article.pk }}" form="form-selection" style="margin-top: 0.3rem;">
+                    
+                    <div style="flex-grow: 1;">
+                        <strong>{{ article.titre }} 
+                            <span style="font-weight: normal; color: #666; font-size: 0.9em;">
+                                ({{ article.version_courante.nombre_signes|default:0 }} signes)
+                            </span>
+                        </strong><br>
+                        <small>{{ article.redacteur.username }} | {{ article.rubrique.nom|default:"Sans rubrique" }}</small>
+                        
+                        <div class="actions" style="margin-top: 0.5rem; display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                            <!-- FORMULAIRE DE PLACEMENT (indépendant, pas de form englobant) -->
+                            <form method="post" action="{% url 'publications:placer_article_page' article.pk %}" style="margin: 0; display: flex; gap: 0.3rem;">
+                                {% csrf_token %}
+                                <select name="page_id" class="select-rubrique" style="width: auto; padding: 0.2rem;">
+                                    <option value="">-- Page --</option>
+                                    {% for p in pages %}
+                                        <option value="{{ p.pk }}">
+                                            P. {{ p.numero_page }} 
+                                            {% if p.numero_page == 1 %}(Une){% elif p.numero_page == 2 %}(Édito){% endif %}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                <button type="submit" class="btn btn-sm btn-primary">Placer</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <p style="font-style: italic; color: #888;">Aucun article en attente. Utilisez l'onglet "Choisir" pour en ajouter.</p>
+            {% endfor %}
+        </div> <!-- FERMETURE DE LA DIV VIVIER -->
+
+        <!-- ========================================== -->
+        <!-- COLONNE DROITE : LE CHEMIN DE FER          -->
+        <!-- ========================================== -->
+        <div class="chemin-de-fer" style="flex: 3;">
+            <h1 style="margin-top: 0; font-size: 2rem; color: #333; border-bottom: 2px solid #eee; padding-bottom: 0.5rem;">📰 Maquette du journal</h1>
+
+            <div class="grille-pages">
+                {% for page in pages %}
+                    <!-- Le fond devient vert pâle si la page est pleine -->
+                    <div class="bloc-page {% if page.numero_page == 1 %}page-une{% endif %}" id="page-{{ page.pk }}"
+                         style="background: {% if page.total_signes >= page.limite_signes|add:'-100' %}#e8f5e9{% else %}#fff{% endif %}; 
+                                border: 1px solid {% if page.total_signes >= page.limite_signes|add:'-100' %}#a5d6a7{% else %}#e0e0e0{% endif %}; 
+                                padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">                        
+                        
+                            <!-- En-tête de la page : Numéro et compteur -->
+                            <div class="entete-page" style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-weight: bold; cursor: pointer;" 
+                                 onclick="window.location='{% url 'publications:organiser_page' page.pk %}'" 
+                                 title="Cliquez pour organiser cette page">
+                                <span class="numero-page">Page {{ page.numero_page }} {% if page.gabarit %}({{ page.gabarit.nom }}){% endif %}</span>
+                                <span class="compteur-signes" ...>
+                                    {{ page.total_signes }} / {{ page.limite_signes }} signes
+                                </span>
+                            </div>
+                        
+                            <!-- Message de confirmation pour les pages pleines -->
+                            {% if page.total_signes >= page.limite_signes|add:'-100' %}
+                                <div style="text-align: center; color: #2e7d32; font-size: 0.85rem; font-weight: bold; margin-bottom: 0.5rem;">
+                                    Contenu défini pour cette page
+                                </div>
+                            {% endif %}
+                        
+                        <!-- Gestion des illustrations ET DE LA RUBRIQUE (VERSION COMPACTE) -->
+                        <form method="GET" action="{% url 'publications:composition' %}" style="font-size: 0.8rem; margin-bottom: 0.5rem; background: #f4f6f8; padding: 0.4rem; border-radius: 4px; display: flex; flex-direction: column; gap: 0.3rem;">
+                            <input type="hidden" name="page_id" value="{{ page.pk }}">
+                            
+                            <!-- LIGNE 1 : Titre + Compteurs -->
+                            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem;">
+                                <strong style="font-size: 0.9rem; color: #333;">Illustrations</strong>
+                                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                    <label style="margin: 0;">Petite :</label>
+                                    <input type="number" name="petites" min="0" max="3" value="{{ page.petites_illustrations }}" style="width: 35px; padding: 1px; border: 1px solid #ccc; text-align: center;">
+                                    
+                                    <label style="margin: 0; margin-left: 0.5rem;">Grande :</label>
+                                    <input type="number" name="grandes" min="0" max="2" value="{{ page.grandes_illustrations }}" style="width: 35px; padding: 1px; border: 1px solid #ccc; text-align: center;">
+                                </div>
+                            </div>
+
+                            <!-- LIGNE 2 : Rubrique + Bouton OK -->
+                            {% if page.numero_page > 2 %}
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <label style="margin: 0; white-space: nowrap;">Rubrique :</label>
+                                <select name="rubrique" class="select-rubrique" style="padding: 1px; border: 1px solid #ccc; flex-grow: 1; font-size: 0.8rem;">
+                                    <option value="">-- Choisir --</option>
+                                    {% for rubrique in rubriques %}
+                                        <option value="{{ rubrique.pk }}" {% if page.rubrique and page.rubrique.pk == rubrique.pk %}selected{% endif %}>
+                                            {{ rubrique.nom }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                <button type="submit" class="btn btn-sm btn-secondary" style="padding: 1px 8px; font-size: 0.75rem;">OK</button>
+                            </div>
+                            {% else %}
+                            <div style="display: flex; justify-content: flex-end;">
+                                <button type="submit" class="btn btn-sm btn-secondary" style="padding: 1px 8px; font-size: 0.75rem;">OK</button>
+                            </div>
+                            {% endif %}
+                        </form>
+
+                        <!-- Spécificités Une / Édito -->
+                        {% if page.numero_page == 1 %}
+                            <h4 style="margin: 0.5rem 0;">Titre de la Une</h4>
+                            <input type="text" placeholder="Saisir le titre principal..." class="titre-une-input" style="width: 100%; padding: 0.3rem; margin-bottom: 1rem;">
+                        {% elif page.numero_page == 2 %}
+                            <h4 style="margin: 0.5rem 0;">Éditorial & Sommaire</h4>
+                        {% endif %}
+
+                        <!-- Articles sur la page -->
+                        <div class="articles-sur-page">
+                            {% for article in page.articles_tries %}
+                                <div class="mini-carte" data-article-id="{{ article.pk }}" data-ordre="{{ article.ordre_sur_page }}" 
+                                        style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; padding: 0.4rem; background: #f9f9f9; border-radius: 4px; margin-bottom: 0.3rem; font-size: 0.9rem;">
+                                    
+                                    <!-- COMPTEUR D'ORDRE (Boutons Monter / Descendre) -->
+                                    <div style="display: flex; align-items: center; gap: 0.2rem;">
+                                        <form method="post" action="{% url 'publications:changer_ordre_article' page.pk article.pk %}" onsubmit="return false;" style="margin: 0;">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="ordre" value="{{ article.ordre_sur_page|add:'-1' }}">
+                                            <button type="button" onclick="soumettreOrdre(this)" style="background:none; border:1px solid #ccc; border-radius: 4px; cursor:pointer; padding: 2px 6px; font-size: 0.7rem;" 
+                                                    {% if article.ordre_sur_page <= 1 %}disabled{% endif %}>▲</button>
+                                        </form>
+
+                                        <span style="font-weight: bold; font-size: 0.85rem; width: 20px; text-align: center; color: #555;">
+                                            {{ article.ordre_sur_page }}
+                                        </span>
+
+                                        <form method="post" action="{% url 'publications:changer_ordre_article' page.pk article.pk %}" onsubmit="return false;" style="margin: 0;">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="ordre" value="{{ article.ordre_sur_page|add:'1' }}">
+                                            <button type="button" onclick="soumettreOrdre(this)" style="background:none; border:1px solid #ccc; border-radius: 4px; cursor:pointer; padding: 2px 6px; font-size: 0.7rem;">▼</button>
+                                        </form>
+                                    </div>
+                                    
+                                    <span style="flex-grow: 1;">
+                                        {{ article.titre }} 
+                                        <small style="color: #888; font-weight: normal; font-size: 0.8rem;">
+                                            ({{ article.version_courante.nombre_signes|default:0 }} signes)
+                                        </small>
+                                    </span>
+                                    
+                                    <!-- BOUTON RETIRER (Croix rouge) -->
+                                    <form method="post" action="{% url 'publications:retirer_article_page' page.pk article.pk %}" style="display:inline; margin: 0;">
+                                        {% csrf_token %}
+                                        <button type="submit" style="background:none; border:none; color:red; cursor:pointer;" title="Retirer de la page (vers le vivier)">✕</button>
+                                    </form>
+                                </div>
+                            {% empty %}
+                                <p style="font-size: 0.8rem; color: #999; font-style: italic; margin-top: 1rem;">Page vide</p>
+                            {% endfor %}
+                        </div>
+                    </div> <!-- FERMETURE de bloc-page -->
+                {% endfor %}
+            </div> <!-- FERMETURE de grille-pages -->
+        </div> <!-- FERMETURE de chemin-de-fer -->
+    </div> <!-- FERMETURE de layout-composition -->
+
+    <!-- PREMIER SCRIPT : Changement d'ordre -->
+    <script>
+        function soumettreOrdre(btn) {
+            const form = btn.closest('form');
+            const formData = new FormData(form);
+            const articleId = form.id.replace('form-ordre-', '');
+            const pageId = form.closest('.bloc-page').id.replace('page-', '');
+
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: { 'X-CSRFToken': formData.get('csrfmiddlewaretoken') }
+            }).then(response => {
+                if (response.ok) {
+                    const pageDiv = document.getElementById('page-' + pageId);
+                    const conteneur = pageDiv.querySelector('.articles-sur-page');
+                    let cartes = Array.from(conteneur.querySelectorAll('.mini-carte'));
+                    const newOrdre = parseInt(formData.get('ordre'));
+
+                    const indexActuel = cartes.findIndex(c => c.getAttribute('data-article-id') === String(articleId));
+                    if (indexActuel !== -1) {
+                        const carte = cartes.splice(indexActuel, 1)[0];
+                        const nouvellePosition = Math.min(Math.max(newOrdre - 1, 0), cartes.length);
+                        cartes.splice(nouvellePosition, 0, carte);
+                    }
+
+                    cartes.forEach((c, index) => {
+                        c.setAttribute('data-ordre', index + 1);
+                        conteneur.appendChild(c);
+                    });
+                    
+                    const currentScroll = window.scrollY;
+                    localStorage.setItem('scrollPos', currentScroll);
+                    window.location.reload(); 
+                }
+            }).catch(error => console.error('Erreur:', error));
+        }
+
+        function toggleVivier() {
+            var vivier = document.getElementById('vivier-container');
+            var actions = document.getElementById('actions-vivier');
+            var btn = document.getElementById('btn-toggle-vivier');
+            
+            if (vivier.style.display === 'none') {
+                vivier.style.display = 'block';
+                if (actions) actions.style.display = 'flex'; // Affiche la barre d'actions
+                btn.innerHTML = 'Masquer le vivier';
+            } else {
+                vivier.style.display = 'none';
+                if (actions) actions.style.display = 'none'; // Masque la barre d'actions
+                btn.innerHTML = 'Afficher le vivier';
+            }
+        }
+
+        // Masquer la barre d'actions si le vivier est masqué au chargement
+        document.addEventListener('DOMContentLoaded', function() {
+            var vivier = document.getElementById('vivier-container');
+            var actions = document.getElementById('actions-vivier');
+            
+            if (vivier && vivier.style.display === 'none') {
+                if (actions) actions.style.display = 'none';
+            }
+        });
+        
+        window.addEventListener('load', function() {
+            // 1. Si on a une ancre dans l'URL
+            if (window.location.hash) {
+                const targetId = window.location.hash.substring(1); // Enlève le #
+                const targetElement = document.getElementById(targetId);
+                
+                if (targetElement) {
+                    // On scrolle vers l'élément avec un petit décalage pour voir le haut de la page
+                    const yOffset = -100; 
+                    const y = targetElement.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                    window.scrollTo({top: y, behavior: 'instant'});
+                }
+                // On s'arrête là, on ne restaure pas le localStorage
+                return;
+            }
+
+            // 2. Sinon, restauration du scroll pour le changement d'ordre
+            if (localStorage.getItem('scrollPos')) {
+                window.scrollTo(0, parseInt(localStorage.getItem('scrollPos')));
+                localStorage.removeItem('scrollPos');
+            }
+        });
+    </script>
+
+    <!-- DEUXIÈME SCRIPT : Tout sélectionner -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const selectAll = document.getElementById('select-all-composer');
+            const checkboxes = document.querySelectorAll('input[name="article_ids"]');
+
+            if (selectAll) {
+                selectAll.addEventListener('change', function() {
+                    checkboxes.forEach(cb => cb.checked = selectAll.checked);
+                });
+
+                checkboxes.forEach(cb => {
+                    cb.addEventListener('change', function() {
+                        if (!this.checked) {
+                            selectAll.checked = false;
+                        } else if (document.querySelectorAll('input[name="article_ids"]:checked').length === checkboxes.length) {
+                            selectAll.checked = true;
+                        }
+                    });
+                });
+            }
+        });
+    </script>
+{% endblock %}

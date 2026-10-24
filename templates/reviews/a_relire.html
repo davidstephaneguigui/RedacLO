@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+{% load url_utils %}
+
+{% block main_class %}main-large{% endblock %}
+
+{% block titre %}Articles à traiter — RedacLo{% endblock %}
+
+{% block contenu %}
+    <h2>
+        {% if user.role == "relecteur" %}
+            Mes articles à relire
+        {% else %}
+            Articles à traiter
+        {% endif %}
+    </h2>
+
+    <!-- 1. LES BOUTONS (Toujours visibles) -->
+    <div style="display: flex; justify-content: flex-end; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+        <!-- Bouton pour afficher/masquer le tri -->
+        <button type="button" class="btn btn-secondary" onclick="toggleTri()">⚙️ Trier les articles</button>
+        
+        <!-- Bouton Archives -->
+        {% if est_archive %}
+            <a href="{% url 'reviews:a_relire' %}" class="btn btn-primary">
+                &larr; Revenir aux relectures en cours
+            </a>
+        {% else %}
+            <a href="?archives=1" class="btn btn-secondary">
+                Voir les articles archivés (rejetés)
+            </a>
+        {% endif %}
+    </div>
+
+    <!-- 2. LA BARRE DE TRI (Cachée par défaut, toujours présente) -->
+    <div id="bloc-tri" style="display: none; margin-bottom: 1.5rem;">
+        <form method="get" style="background: #f4f6f8; padding: 1rem; border-radius: 8px; display: flex; flex-direction: row; align-items: center; gap: 0.8rem; flex-wrap: wrap;">
+            {% if est_archive %}<input type="hidden" name="archives" value="1">{% endif %}
+            
+            <label style="font-weight: bold; margin: 0; color: #333; white-space: nowrap;">Trier par :</label>
+            
+            <select name="tri_statut" style="padding: 0.4rem; border-radius: 4px; border: 1px solid #ccc; width: auto;">
+                <option value="">- Statut -</option>
+                <option value="asc" {% if tri_statut == 'asc' %}selected{% endif %}>Statut (Normal)</option>
+                <option value="desc" {% if tri_statut == 'desc' %}selected{% endif %}>Statut (Inversé)</option>
+            </select>
+
+            <select name="tri_date" style="padding: 0.4rem; border-radius: 4px; border: 1px solid #ccc; width: auto;">
+                <option value="">- Date -</option>
+                <option value="desc" {% if tri_date == 'desc' %}selected{% endif %}>Date (Plus récent)</option>
+                <option value="asc" {% if tri_date == 'asc' %}selected{% endif %}>Date (Plus ancien)</option>
+            </select>
+
+            <select name="tri_relectures" style="padding: 0.4rem; border-radius: 4px; border: 1px solid #ccc; width: auto;">
+                <option value="">- Relectures -</option>
+                <option value="desc" {% if tri_relectures == 'desc' %}selected{% endif %}>Relectures (Plus)</option>
+                <option value="asc" {% if tri_relectures == 'asc' %}selected{% endif %}>Relectures (Moins)</option>
+            </select>
+
+            <button type="submit" class="btn btn-sm btn-primary" style="white-space: nowrap; margin: 0;">Appliquer</button>
+            <button type="button" class="btn btn-sm btn-ghost" onclick="toggleTri()" style="margin: 0;">Annuler</button>
+        </form>
+    </div>
+
+    <!-- 3. LE TABLEAU OU LE MESSAGE VIDE -->
+    {% if articles %}
+        <table class="table-liste table-responsive-cards">
+            <thead>
+                <tr>
+                    <th style="width: 25%; text-align: left;">Titre</th>
+                    <th style="width: 10%; text-align: left;">Type</th>
+                    <th style="width: 15%; text-align: left;">Rédacteur</th>
+                    <th style="width: 15%; text-align: left;">Relectures</th>
+                    <th style="width: 20%; text-align: left;">Statut</th>
+                    <th style="width: 15%; text-align: left;">Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for article in articles %}
+                    <tr>
+                        <!-- TITRE -->
+                        <td data-label="Titre" style="cursor: pointer;" onclick="window.location='{% url 'articles:liste_versions' article.pk %}';">
+                            <span style="color: #0056b3; text-decoration: none; font-weight: 500;">
+                                {{ article.titre }}
+                            </span>
+                        </td>
+
+                        <!-- TYPE -->
+                        <td data-label="Type">
+                            <div class="cellule-interne text-muted">
+                                {{ article.get_type_article_display }}
+                            </div>
+                        </td>
+
+                        <!-- RÉDACTEUR -->
+                        <td data-label="Rédacteur">
+                            <div class="cellule-interne text-right-mobile">
+                                <strong>{{ article.redacteur.get_signature }}</strong>
+                                {% if article.redacteur.email %}
+                                    <br>
+                                    <a href="mailto:{{ article.redacteur.email }}" style="font-style: italic; color: #666; text-decoration: none;">
+                                        {{ article.redacteur.email }}
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </td>
+
+                        <!-- RELECTURES -->
+                        <td data-label="Relectures">
+                            <div class="cellule-interne">
+                                {% with versions_relecture=article.versions.all %}
+                                    {% for v in versions_relecture %}
+                                        {% if v.type == 'relecture' and v.statut == 'brouillon' %}
+                                            <span style="color: #f57c00; font-weight: 600; font-size: 0.85rem;">✍️ {{ v.modifie_par.username }} (en cours)</span><br>
+                                        {% elif v.type == 'relecture' and v.statut == 'soumise' %}
+                                            <span style="color: #2e7d32; font-weight: 600; font-size: 0.85rem;">✅ {{ v.modifie_par.username }} (déposée)</span><br>
+                                        {% endif %}
+                                    {% empty %}
+                                        <span style="color: #999;">Aucune</span>
+                                    {% endfor %}
+                                {% endwith %}
+                            </div>
+                        </td>
+
+                        <!-- STATUT -->
+                        <td data-label="Statut">
+                            <div class="cellule-interne">
+                                {% if article.statut == 'relu' %}
+                                    <span class="badge" style="background-color: #e1bee7; color: #4a148c; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: bold;">
+                                        Relu (à trancher)
+                                    </span>
+                                {% elif article.statut == 'valide_1_fois' %}
+                                    <span class="badge" style="background-color: #fff3cd; color: #856404; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: bold;">
+                                        {% if article.valide_1_par == request.user and not article.valide_1_mandataire %}
+                                            Validé par moi (1/2)
+                                        {% else %}
+                                            Validé une fois par {{ article.valide_1_par.username }}
+                                        {% endif %}
+                                    </span>
+                                {% elif article.statut == 'valide' %}
+                                    <span class="badge" style="background-color: #d4edda; color: #155724; padding: 0.2rem 0.5rem; border-radius: 4px; font-weight: bold;">
+                                        Validé (2/2)
+                                    </span>
+                                {% else %}
+                                    <span class="statut-{{ article.statut }}">{{ article.get_statut_display }}</span>
+                                {% endif %}
+                            </div>
+                        </td>
+
+                        <!-- DATE -->
+                        <td data-label="Date">
+                            <div class="cellule-interne" style="white-space: nowrap;">
+                                {{ article.date_modification|date:"d/m/Y H:i" }}
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% include '_pagination.html' %}
+    {% else %}
+        <p style="margin-top: 2rem; color: #666; font-style: italic; text-align: center;">
+            Aucun article en attente de traitement.
+        </p>
+    {% endif %}
+
+    <!-- Script JS pour le bouton Trier -->
+    <script>
+    function toggleTri() {
+        var bloc = document.getElementById("bloc-tri");
+        if (bloc.style.display === "none") {
+            bloc.style.display = "block";
+        } else {
+            bloc.style.display = "none";
+        }
+    }
+    </script>
+{% endblock %}

@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block titre %}Notifications — RedacLo{% endblock %}
+
+{% block contenu %}
+    <h2>Notifications</h2>
+
+    {% if notifications %}
+
+        <form method="post" action="{% url 'core:marquer_selection' %}" id="form-notifications">
+            {% csrf_token %}
+
+            <div class="notifications-actions">
+                <label>
+                    <input type="checkbox" id="select-all" onclick="toggleAll(this)">
+                    Tout sélectionner
+                </label>
+
+                <!-- value="lu" pour correspondre à la vue -->
+                <button type="submit" name="action" value="lu" class="btn btn-secondary">
+                    Marquer comme lu
+                </button>
+
+                <button type="submit" name="action" value="non_lu" class="btn btn-secondary">
+                    Marquer comme non lu
+                </button>
+
+                <button type="submit" name="action" value="supprimer" class="btn btn-danger" onclick="return confirm('Voulez-vous vraiment supprimer les notifications sélectionnées ?');">
+                    Supprimer la sélection
+                </button>
+            </div>
+
+            <ul class="liste-notifications">
+                {% for n in notifications %}
+                    <li class="notification {% if not n.lue %}non-lue{% endif %}">
+                        <!-- name="notification_ids" pour correspondre à la vue -->
+                        <input type="checkbox" name="notification_ids" value="{{ n.pk }}" id="notif-{{ n.pk }}">
+                        
+                        <a href="{% url 'core:marquer_lue' n.pk %}">
+                            <span class="notification-type">{{ n.get_type_display }}</span>
+                            <span class="notification-message">{{ n.message }}</span>
+                            <span class="notification-date">{{ n.date_creation|date:"d/m/Y à H:i" }}</span>
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </form>
+
+    {% else %}
+        <p>Vous n'avez aucune notification.</p>
+    {% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleAll(source) {
+    // On cible le bon name ici aussi
+    document.querySelectorAll('input[name="notification_ids"]').forEach(function (c) {
+        c.checked = source.checked;
+    });
+}
+</script>
+{% endblock %}

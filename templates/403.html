@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block titre %}Accès refusé — RedacLo{% endblock %}
+
+{% block contenu %}
+    <h2>Accès refusé</h2>
+    <p>Vous n'avez pas les droits nécessaires pour accéder à cette page.</p>
+    <p>Votre rôle actuel : {{ user.get_role_display }}.</p>
+    <a href="{% url 'core:accueil' %}">Retour à l'accueil</a>
+{% endblock %}

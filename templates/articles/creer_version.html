@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block titre %}Créer ma version — {{ article.titre }}{% endblock %}
+
+{% block contenu %}
+    <h2>Créer ma version de relecture</h2>
+
+    <p><strong>Article :</strong> {{ article.titre }}</p>
+    <p>
+        <strong>Version de départ :</strong>
+        v{{ version_parent.numero }} ({{ version_parent.get_type_display }})
+        {% if version_parent.auteur_modification %}
+            par {{ version_parent.auteur_modification.username }}
+        {% endif %}
+    </p>
+
+    <p class="aide">
+        Modifiez le texte ci-dessous. Votre version sera enregistrée
+        séparément : le texte de la version de départ restera intact.
+    </p>
+
+        <form method="post">
+        {% csrf_token %}
+
+        <div class="champ-version">
+            <label for="{{ form.contenu.id_for_label }}">Texte de la version :</label>
+            {{ form.contenu }}
+            {% if form.contenu.errors %}
+                <div class="erreur">{{ form.contenu.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div class="champ-version">
+            <label for="{{ form.commentaire.id_for_label }}">Commentaire (facultatif) :</label>
+            {{ form.commentaire }}
+        </div>
+
+        <p>
+            <button type="submit">Créer ma version</button>
+            <a href="{% url 'articles:annoter_article' article.pk %}">Annuler</a>
+        </p>
+    </form>
+{% endblock %}

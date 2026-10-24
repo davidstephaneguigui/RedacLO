@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block titre %}Assigner un relecteur — RedacLo{% endblock %}
+
+{% block contenu %}
+    <h2>Assigner un relecteur</h2>
+
+    <p>Article : <strong>{{ article.titre }}</strong></p>
+    <p>Auteur : {{ article.auteur.username }}</p>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Assigner</button>
+            <a href="{% url 'articles:detail_article' article.pk %}" class="btn btn-secondary">Annuler</a>
+        </div>
+    </form>
+{% endblock %}

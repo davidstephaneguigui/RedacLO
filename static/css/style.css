@@ -1,0 +1,656 @@
+/* ============================================================
+   RedacLo — Feuille de styles
+   ============================================================ */
+
+/* ------------------------------------------------------------
+   1. VARIABLES
+   ------------------------------------------------------------ */
+:root {
+    --c-primary:       #2563eb;
+    --c-primary-dark:  #1e40af;
+    --c-primary-soft:  #dbeafe;
+    --c-success:       #16a34a;
+    --c-success-soft:  #dcfce7;
+    --c-danger:        #dc2626;
+    --c-danger-dark:   #991b1b;
+    --c-danger-soft:   #fee2e2;
+    --c-warning:       #d97706;
+    --c-warning-soft:  #fef3c7;
+    --c-text:          #1f2937;
+    --c-text-muted:    #6b7280;
+    --c-text-light:    #9ca3af;
+    --c-bg:            #f9fafb;
+    --c-surface:       #ffffff;
+    --c-surface-alt:   #f3f4f6;
+    --c-border:        #e5e7eb;
+    --c-border-strong: #d1d5db;
+    --s-1: 0.25rem;
+    --s-2: 0.5rem;
+    --s-3: 0.75rem;
+    --s-4: 1rem;
+    --s-5: 1.5rem;
+    --s-6: 2rem;
+    --s-8: 3rem;
+    --font-sans:  system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --font-serif: Georgia, "Times New Roman", serif;
+    --radius-sm: 4px;
+    --radius:    6px;
+    --radius-lg: 10px;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+}
+
+/* ------------------------------------------------------------
+   2. RESET ET BASE
+   ------------------------------------------------------------ */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--c-text);
+    background-color: var(--c-bg);
+}
+
+/* ------------------------------------------------------------
+   3. TYPOGRAPHIE
+   ------------------------------------------------------------ */
+h1, h2, h3, h4 {
+    margin: 0 0 var(--s-3) 0;
+    line-height: 1.25;
+    font-weight: 600;
+    color: var(--c-text);
+}
+h1 { font-size: 1.5rem; color: var(--c-primary); }
+h2 { font-size: 1.25rem; margin-top: var(--s-5); }
+h3 { font-size: 1.05rem; margin-top: var(--s-4); }
+p { margin: 0 0 var(--s-4) 0; }
+a { color: var(--c-primary); text-decoration: none; }
+a:hover { text-decoration: underline; }
+small { font-size: 0.875rem; color: var(--c-text-muted); }
+
+/* ------------------------------------------------------------
+   4. LAYOUT GLOBAL (Header, Main, Footer)
+   ------------------------------------------------------------ */
+header, footer, main {
+    max-width: 95%;
+    margin-left: auto;
+    margin-right: auto;
+    padding: var(--s-4) var(--s-5);
+}
+
+main {
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius-lg);
+    padding: var(--s-6);
+    box-shadow: var(--shadow-sm);
+}
+
+main.main-large {
+    max-width: 95% !important;
+    width: 95% !important;
+    margin: 0 auto !important;
+    padding: var(--s-4) var(--s-5) !important;
+    background: var(--c-surface) !important; 
+    border: 1px solid var(--c-border) !important;
+    box-shadow: var(--shadow-sm) !important;
+}
+
+header { margin-bottom: 0; }
+
+footer {
+    margin-top: var(--s-6);
+    padding: var(--s-4) 0;
+    font-size: 0.85rem;
+    color: var(--c-text-muted);
+    text-align: center;
+}
+
+/* --- EN-TÊTE --- */
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 0.8rem;
+}
+.site-title { margin: 0; font-size: 1.5rem; }
+.site-title a { color: var(--c-primary); text-decoration: none; }
+.site-title a:hover { text-decoration: none; color: var(--c-primary-dark); }
+.user-greeting { margin: 0; font-size: 0.95rem; color: var(--c-text-muted); }
+
+/* --- NAVIGATION --- */
+.main-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--c-border);
+    border-bottom: 1px solid var(--c-border);
+    padding: 0.6rem 0;
+    margin-bottom: 1.5rem;
+}
+.nav-left { display: flex; align-items: center; gap: 0.5rem; }
+.nav-right { display: flex; align-items: center; }
+.menu-burger {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: var(--c-text);
+}
+
+/* ------------------------------------------------------------
+   5. TABLEAUX (DESKTOP)
+   ------------------------------------------------------------ */
+.table-liste {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+    table-layout: fixed;
+}
+.table-liste thead th {
+    text-align: left;
+    padding: 1rem;
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--c-text-muted);
+    border-bottom: 2px solid var(--c-border);
+    background-color: var(--c-surface-alt);
+}
+.table-liste tbody td {
+    padding: 0 1rem;
+    border-bottom: 1px solid var(--c-border);
+    height: 4rem;
+    vertical-align: middle;
+    overflow: hidden;
+}
+.table-liste tbody tr:hover { background-color: var(--c-surface-alt); }
+.table-liste tbody tr:last-child td { border-bottom: none; }
+
+.cellule-interne {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+}
+.texte-tronque {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.4;
+}
+
+/* ------------------------------------------------------------
+   6. FORMULAIRES
+   ------------------------------------------------------------ */
+label {
+    display: block;
+    font-weight: 500;
+    font-size: 0.9rem;
+    margin-bottom: var(--s-1);
+    color: var(--c-text);
+}
+input[type="text"], input[type="email"], input[type="password"], 
+input[type="number"], input[type="date"], input[type="url"], 
+select, textarea {
+    display: block;
+    width: 100%;
+    padding: var(--s-2) var(--s-3);
+    font: inherit;
+    font-size: 0.95rem;
+    color: var(--c-text);
+    background-color: var(--c-surface);
+    border: 1px solid var(--c-border-strong);
+    border-radius: var(--radius);
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--c-primary);
+    box-shadow: 0 0 0 3px var(--c-primary-soft);
+}
+textarea {
+    min-height: 300px;
+    font-family: var(--font-serif);
+    line-height: 1.6;
+    resize: vertical;
+}
+.textarea-large {
+    width: 100% !important;
+    min-height: 500px;
+    font-family: var(--font-serif);
+    font-size: 1rem;
+    line-height: 1.6;
+    padding: var(--s-4);
+    border: 1px solid var(--c-border-strong);
+    border-radius: var(--radius);
+    resize: vertical;
+}
+.aide {
+    font-size: 0.85rem;
+    color: var(--c-text-muted);
+    font-style: italic;
+    margin-bottom: var(--s-4);
+}
+.erreur { font-size: 0.85rem; color: var(--c-danger); margin-top: var(--s-1); }
+
+.form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-3);
+    align-items: center;
+    margin-top: var(--s-5);
+}
+.form-actions .btn-annuler { margin-left: auto; }
+
+.custom-file-upload {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Force la hauteur du textarea des commentaires */
+#id_commentaires {
+    height: auto !important;
+    min-height: 40px !important; /* Ajuste cette valeur si besoin */
+}
+
+/* ------------------------------------------------------------
+   7. BOUTONS
+   ------------------------------------------------------------ */
+button { font: inherit; cursor: pointer; }
+
+.btn {
+    display: inline-block;
+    padding: var(--s-2) var(--s-4);
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 500;
+    line-height: 1.4;
+    text-align: center;
+    text-decoration: none;
+    border: 1px solid transparent;
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+    white-space: nowrap;
+}
+.btn:hover { text-decoration: none; }
+
+.btn-primary { background-color: var(--c-primary); color: #fff; border-color: var(--c-primary); }
+.btn-primary:hover { background-color: var(--c-primary-dark); border-color: var(--c-primary-dark); color: #fff; }
+
+.btn-secondary { background-color: var(--c-surface); color: var(--c-text); border-color: var(--c-border-strong); }
+.btn-secondary:hover { background-color: var(--c-surface-alt); border-color: var(--c-text-muted); color: var(--c-text); }
+
+/* Bouton tertiaire (Bleu acier avec bordure verte) */
+a.btn-tertiary, button.btn-tertiary {
+    background-color: #3b4e75 !important;
+    border: 1px solid #2e7d32 !important;
+    color: #ffffff !important;
+    text-decoration: none !important;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.4rem 1rem;
+    border-radius: 4px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+a.btn-tertiary:hover, button.btn-tertiary:hover {
+    background-color: #2c3b5a !important;
+    border-color: #1b5e20 !important;
+    color: #ffffff !important;
+}
+
+.btn-ghost { background-color: transparent; color: var(--c-text); border-color: transparent; }
+.btn-ghost:hover { background-color: var(--c-surface-alt); color: var(--c-text); }
+
+.btn-ghost.active {
+    background-color: var(--c-surface-alt); color: var(--c-primary); font-weight: bold;
+    border-bottom: 2px solid var(--c-primary); /* optionnel : une barre de soulignement */
+}
+
+.btn-danger { background-color: transparent; color: var(--c-danger); border-color: transparent; }
+.btn-danger:hover { background-color: var(--c-danger-soft); color: var(--c-danger-dark); }
+
+.btn-danger-solid { background-color: var(--c-danger); color: #fff; border-color: var(--c-danger); }
+.btn-danger-solid:hover { background-color: var(--c-danger-dark); border-color: var(--c-danger-dark); color: #fff; }
+
+.btn-success { background-color: var(--c-success); color: #fff; border-color: var(--c-success); }
+.btn-success:hover { background-color: #15803d; border-color: #15803d; color: #fff; }
+
+.btn-sm { padding: var(--s-1) var(--s-3); font-size: 0.85rem; }
+
+.btn-lien {
+    background: none; border: none; color: var(--c-primary);
+    padding: 0; font-size: inherit; font-family: inherit; text-decoration: none;
+}
+.btn-lien:hover { text-decoration: underline; color: var(--c-primary-dark); }
+
+.actions { display: flex; flex-wrap: wrap; gap: var(--s-2); align-items: center; margin: var(--s-4) 0; }
+
+/* ------------------------------------------------------------
+   8. MESSAGES FLASH ET BADGES
+   ------------------------------------------------------------ */
+.messages { list-style: none; padding: 0; margin: var(--s-4) 0; }
+.message { padding: var(--s-3) var(--s-4); border-radius: var(--radius); margin-bottom: var(--s-2); font-size: 0.95rem; }
+.message.success { background-color: var(--c-success-soft); color: var(--c-success); border: 1px solid #86efac; }
+.message.error { background-color: var(--c-danger-soft); color: var(--c-danger); border: 1px solid #fca5a5; }
+.message-avertissement { background: var(--c-warning-soft); border-left: 4px solid var(--c-warning); padding: var(--s-3) var(--s-4); border-radius: var(--radius-sm); margin: var(--s-4) 0; }
+
+.badge-finale { display: inline-block; background-color: var(--c-success-soft); color: var(--c-success); font-size: 0.75rem; font-weight: 600; padding: 2px 8px; border-radius: 999px; margin-left: var(--s-2); }
+
+.statut-brouillon { color: var(--c-text-muted); }
+.statut-soumis { color: var(--c-primary); font-weight: 600; }
+.statut-en_relecture { color: var(--c-primary); font-weight: 600; }
+.statut-valide { color: var(--c-success); font-weight: 600; }
+.statut-rejete { color: var(--c-danger); font-weight: 600; }
+.statut-soumise { color: var(--c-primary); font-weight: 600; }
+.statut-validee { color: var(--c-success); font-weight: 600; }
+.statut-rejetee { color: var(--c-danger); font-weight: 600; }
+.statut-relu {
+    background-color: #f3e5f5; /* Violet très clair */
+    color: #4a148c;            /* Violet foncé */
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+
+.text-success { color: var(--c-success) !important; }
+.text-warning { color: var(--c-warning) !important; }
+.text-muted { color: var(--c-text-muted) !important; }
+
+/* ------------------------------------------------------------
+   9. TEXTE ANNOTÉ
+   ------------------------------------------------------------ */
+.rel-bleu { color: #1565c0; }
+.rel-violet { color: #6a1b9a; }
+.rel-gris { color: #546e7a; }
+.rel-marine { color: #0d47a1; }
+.rel-orangefonce { color: #bf360c; }
+.rel-marron { color: #4e342e; }
+.rel-rouge { color: #c62828; }
+.rel-vert { color: #2e7d32; }
+
+.auteur { color: var(--c-text); }
+del { text-decoration: line-through; background-color: rgba(220, 38, 38, 0.08); }
+ins { text-decoration: none; background-color: rgba(22, 163, 74, 0.08); }
+.commentaire { background-color: rgba(0, 0, 0, 0.06); border-bottom: 1px dotted currentColor; padding: 0 2px; }
+
+.texte-article, .texte-version {
+    padding: var(--s-4);
+    border: 1px solid var(--c-border);
+    border-radius: var(--radius);
+    background-color: var(--c-surface-alt);
+    font-family: var(--font-serif);
+    line-height: 1.7;
+    white-space: pre-wrap;
+}
+.texte-article-simple { font-family: var(--font-serif); line-height: 1.6; text-align: justify; font-size: 1.05rem; }
+.texte-article-simple p { text-indent: 0.7cm; margin: 0 0 1em 0; }
+
+.source-texte { font-size: 0.85rem; color: var(--c-text-muted); margin-bottom: var(--s-3); }
+.meta-version { font-size: 0.85rem; color: var(--c-text-muted); margin-bottom: var(--s-4); }
+
+/* ------------------------------------------------------------
+   10. NOTIFICATIONS ET MENUS
+   ------------------------------------------------------------ */
+.selecteur-version {
+    display: flex; 
+    align-items: center; 
+    gap: 1rem;
+    padding: var(--s-3) var(--s-4); 
+    background-color: var(--c-primary-soft);
+    border-radius: var(--radius); 
+    margin: var(--s-4) 0; 
+    font-size: 0.9rem;
+}
+
+.selecteur-version label {
+    margin: 0;
+    font-weight: 500;
+    white-space: nowrap; /* Empêche le texte de se tasser */
+}
+
+/* On force la liste déroulante à avoir une taille raisonnable */
+.selecteur-version select {
+    flex: 0 1 400px; /* Elle prendra au maximum 400px de large */
+    width: 100%;     /* Elle s'adapte si l'écran est plus petit */
+    padding: var(--s-2) var(--s-3);
+    border: 1px solid var(--c-border-strong);
+    border-radius: var(--radius);
+    font-size: 0.9rem;
+}
+.menu-annotation {
+    position: absolute; background: var(--c-surface); border: 1px solid var(--c-border-strong);
+    border-radius: var(--radius); padding: var(--s-1); box-shadow: var(--shadow-md); z-index: 1000;
+}
+.cloche { position: relative; display: inline-block; padding: var(--s-1); font-size: 1.1rem; text-decoration: none; vertical-align: middle; }
+.cloche-badge {
+    position: absolute; top: -4px; right: -6px; background-color: var(--c-danger); color: white;
+    font-size: 0.7rem; font-weight: 700; min-width: 18px; padding: 1px 5px; border-radius: 999px; text-align: center; line-height: 1.4;
+}
+.liste-notifications { 
+    list-style: none; 
+    padding: 0; 
+    margin: var(--s-4) 0; 
+    width: 100%; /* Ajouté */
+}
+
+.notification { 
+    display: flex; 
+    align-items: flex-start; 
+    gap: var(--s-3); 
+    margin-bottom: var(--s-2); 
+    width: 100%; /* Ajouté */
+}
+
+.notification a { 
+    flex: 1; /* <--- C'EST LA LIGNE MAGIQUE */
+    display: block; 
+    padding: var(--s-3) var(--s-4); 
+    border: 1px solid var(--c-border); 
+    border-radius: var(--radius); 
+    background-color: var(--c-surface-alt); 
+    color: var(--c-text); 
+}
+
+/* Le reste ne change pas */
+.notification.non-lue a { 
+    background-color: var(--c-primary-soft); 
+    border-color: #93c5fd; 
+    font-weight: 500; 
+}
+
+.notification-date { 
+    display: block; 
+    font-size: 0.8rem; 
+    color: var(--c-text-light); 
+    margin-top: var(--s-1); 
+}
+
+.ligne-notification { margin: var(--s-3) 0; font-size: 0.9rem; color: var(--c-text-muted); }
+.presentation-role { margin: var(--s-5) 0; padding: var(--s-4); background-color: var(--c-surface-alt); border-left: 3px solid var(--c-primary); border-radius: var(--radius); font-size: 0.95rem; line-height: 1.6; }
+
+/* ------------------------------------------------------------
+   11. COMPARAISON ET CHEMIN DE FER
+   ------------------------------------------------------------ */
+.comparaison { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-5); width: 100%; margin-top: var(--s-4); }
+.comparaison-colonne { min-width: 0; border: 1px solid var(--c-border); border-radius: var(--radius); padding: var(--s-4); background: var(--c-surface); }
+.comparaison-texte { font-family: var(--font-serif); line-height: 1.7; white-space: pre-wrap; word-wrap: break-word; font-size: 0.95rem; }
+
+.layout-composition { display: flex; gap: 2rem; margin-top: 1.5rem; align-items: flex-start; width: 100%; }
+.vivier { flex: 0 0 320px; background: var(--c-surface); padding: 1rem; border-radius: var(--radius-lg); border: 1px solid var(--c-border); box-shadow: var(--shadow-sm); position: sticky; top: 1rem; max-height: calc(100vh - 2rem); overflow-y: auto; }
+.chemin-de-fer { flex: 1; min-width: 0; }
+.grille-pages { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem; }
+.bloc-page { border: 2px dashed var(--c-border-strong); border-radius: var(--radius); padding: 1.2rem; background: var(--c-surface); min-height: 450px; display: flex; flex-direction: column; transition: all 0.2s ease; }
+.page-une { border: 2px solid var(--c-primary); background: var(--c-primary-soft); }
+.entete-page { display: flex; justify-content: space-between; font-size: 0.9rem; font-weight: bold; color: var(--c-text-muted); margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--c-border); }
+.mini-carte { background: var(--c-surface-alt); border: 1px solid var(--c-border-strong); padding: 0.6rem 0.8rem; border-radius: var(--radius-sm); margin-bottom: 0.6rem; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; }
+
+/* ------------------------------------------------------------
+   12. RESPONSIVE GLOBAL
+   ------------------------------------------------------------ */
+@media (max-width: 900px) {
+    /* Navigation Mobile */
+    .menu-burger { display: block; }
+    .nav-left {
+        display: none; position: absolute; top: 100%; left: 0; width: 100%;
+        flex-direction: column; align-items: flex-start;
+        background: var(--c-surface); border: 1px solid var(--c-border);
+        border-radius: var(--radius); padding: 1rem; margin-top: 0.5rem;
+        z-index: 100; box-shadow: var(--shadow-md);
+    }
+    .nav-left.active { display: flex; }
+    .main-nav { position: relative; flex-wrap: wrap; align-items: flex-start; }
+
+    /* Masquer les boutons desktop */
+    .btn-desktop-only { display: none !important; }
+
+    /* Comparaison empilée */
+    .comparaison { grid-template-columns: 1fr; }
+
+    /* Chemin de fer empilé */
+    .layout-composition { flex-direction: column; }
+    .vivier { position: static; flex: none; width: 100%; max-height: none; margin-bottom: 1.5rem; }
+    .grille-pages { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+
+
+    /* --- TABLEAUX EN CARTES (MOBILE) --- */
+    .table-responsive-cards { display: block; width: 100%; }
+    .table-responsive-cards thead { display: none; }
+    .table-responsive-cards tbody, .table-responsive-cards tr, .table-responsive-cards td { display: block; width: 100%; }
+    
+    /* La carte */
+    .table-responsive-cards tr {
+        margin-bottom: 1.5rem; 
+        border: 1px solid var(--c-border);
+        border-radius: var(--radius); 
+        background: var(--c-surface);
+        box-shadow: var(--shadow-sm); 
+        padding: 1rem;
+    }
+    
+    /* Les cellules (par défaut : label à gauche, valeur à droite) */
+    .table-responsive-cards td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        text-align: right; 
+        padding: 0.8rem 0;
+        border-bottom: 1px solid var(--c-surface-alt); 
+        height: auto;
+    }
+    .table-responsive-cards td:last-child { border-bottom: none; padding-bottom: 0; }
+    
+    /* Le label (TITRE, TYPE...) */
+    .table-responsive-cards td::before {
+        content: attr(data-label); 
+        display: inline-block;
+        font-weight: bold; 
+        color: var(--c-text-muted);
+        font-size: 0.85rem; 
+        text-transform: uppercase; 
+        margin-right: 1rem;
+        flex-shrink: 0;
+    }
+    
+    /* La div interne (qui contient la valeur) prend le reste de la place */
+    .table-responsive-cards .cellule-interne { 
+        display: block; 
+        height: auto; 
+        text-align: right; 
+        flex-grow: 1;
+    }
+    
+    /* --- CAS SPÉCIFIQUE DU TITRE --- */
+    .table-responsive-cards td[data-label="Titre"] { 
+        display: block; 
+        text-align: left; 
+        min-height: 6rem; /* Force la cellule à faire au moins cette hauteur (environ 80px) */
+        /* On garde un peu de padding pour que le texte ne colle pas aux bords */
+        padding-top: 0.2rem;
+        padding-bottom: 1rem;
+    }
+    .table-responsive-cards td[data-label="Titre"]::before { 
+        display: block; /* Le label est au-dessus */
+        margin-bottom: 0.3rem;
+    }
+    .table-responsive-cards td[data-label="Titre"] .cellule-interne {
+        text-align: left;
+    }
+    
+    /* On annule la troncature sur mobile : le titre s'affiche en entier */
+    .table-responsive-cards td[data-label="Titre"] .texte-tronque {
+        display: block;
+        -webkit-line-clamp: unset;
+        line-clamp: unset; /* <-- AJOUTE CETTE LIGNE */
+        overflow: visible;
+    }
+    .champ-fichier {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 0.2rem !important;
+    }
+}
+
+/* ------------------------------------------------------------
+   13. PAGINATION
+   ------------------------------------------------------------ */
+
+.pagination {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--espacement-md, 1rem);
+    margin-top: var(--espacement-lg, 1.5rem);
+    padding-top: var(--espacement-md, 1rem);
+    border-top: 1px solid var(--couleur-bordure, #e0e0e0);
+}
+.pagination-info {
+    font-size: 0.9rem;
+    color: var(--couleur-texte-doux, #666);
+}
+.pagination-links {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+.pagination-current {
+    padding: 0 0.6rem;
+    font-size: 0.9rem;
+    color: var(--couleur-texte-doux, #666);
+}
+@media (max-width: 600px) {
+    .pagination { flex-direction: column; align-items: stretch; }
+    .pagination-links { justify-content: center; flex-wrap: wrap; }
+}
+
+
+/* ------------------------------------------------------------
+   14. COULEURS POUR RELECTURE
+   ------------------------------------------------------------ */
+
+/* Couleurs des diffs (à adapter selon tes noms de classes) */
+del.rel-bleu { color: #0066cc; text-decoration: line-through; }
+ins.rel-bleu { color: #0066cc; text-decoration: underline; }
+
+del.rel-rouge { color: #cc0000; text-decoration: line-through; }
+ins.rel-rouge { color: #cc0000; text-decoration: underline; }
+
+del.rel-vert { color: #2e7d32; text-decoration: line-through; }
+ins.rel-vert { color: #2e7d32; text-decoration: underline; }

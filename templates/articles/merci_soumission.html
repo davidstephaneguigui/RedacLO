@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block titre %}Merci pour votre soumission — RedacLo{% endblock %}
+
+{% block contenu %}
+    <div style="text-align: center; padding: 4rem 1rem;">
+        <h2 style="color: var(--c-success);">Merci pour ta contribution !</h2>
+        
+        <p style="font-size: 1.2rem; margin-top: 1.5rem;">
+            Ton article a bien été transmis à la rédaction.
+        </p>
+        
+        <p style="color: var(--c-text-muted); max-width: 600px; margin: 1rem auto 2rem auto; text-align: justify;">
+            L'équipe de la rédaction va l'étudier avec la plus grande attention.
+            Si nous avons besoin de précisions concernant ton texte ou pour donner suite à ta proposition,
+            nous te contacterons à l'adresse email que tu nous as indiquée.
+        </p>
+
+        <p style="color: var(--c-text-muted); max-width: 600px; margin: 1rem auto 2rem auto; text-align: justify;">
+            <b>Bonne journée à toi et à bientôt</b>
+        </p>
+
+
+        
+        <a href="{% url 'core:accueil' %}" class="btn btn-primary">Retour à l'accueil</a>
+    </div>
+{% endblock %}

@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% load url_utils %}
+
+{% block contenu %}
+<div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); width: 100%; box-sizing: border-box;">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h1 style="margin: 0; font-size: 1.5rem; color: #333;">Choisir les articles pour le numéro</h1>
+    </div>
+    
+    <p style="margin-bottom: 1.5rem; color: #666;">
+        Voici la liste des articles validés, prêts à être intégrés au prochain numéro.
+    </p>
+
+    <!-- Formulaire englobant pour la sélection multiple -->
+    <form method="post">
+        {% csrf_token %}
+        
+        <!-- Barre d'actions au-dessus du tableau -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+            
+            <!-- BLOC DE GAUCHE : Réservation -->
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+
+                <button type="submit" name="action" value="reserver" class="btn btn-warning">
+                    Réserver pour les numéros suivants
+                </button>
+                <a href="{% url 'articles:articles_reserves' %}" class="btn btn-secondary">
+                    Voir les articles réservés
+                </a>
+            </div>
+
+            <!-- BLOC DE DROITE : Numéro en cours -->
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <button type="submit" name="action" value="ajouter" class="btn btn-primary">
+                    Choisir pour le numéro {% if numero_en_cours %}n°{{ numero_en_cours.numero }}{% endif %}
+                </button>
+                
+                <a href="{% url 'publications:composition' %}" class="btn btn-tertiary">
+                    Aller vers la composition &rarr;
+                </a>
+            </div>
+        </div>
+
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+            <thead style="background-color: #f4f6f8; border-bottom: 2px solid #e0e0e0;">
+                <tr>
+                    <th style="width: 5%; padding: 1rem; text-align: center;">
+                        <input type="checkbox" id="select-all-choisir" onclick="toggleAll(this)" style="transform: scale(1.3); cursor: pointer;" title="Tout sélectionner">
+                    </th>
+                    <th style="width: 35%; padding: 1rem; font-size: 0.85rem; color: #666; font-weight: 600; text-transform: uppercase;">Titre</th>
+                    <th style="width: 10%; padding: 1rem; font-size: 0.85rem; color: #666; font-weight: 600; text-transform: uppercase;">Type</th>
+                    <th style="width: 15%; padding: 1rem; font-size: 0.85rem; color: #666; font-weight: 600; text-transform: uppercase;">Rédacteur</th>
+                    <th style="width: 10%; padding: 1rem; font-size: 0.85rem; color: #666; font-weight: 600; text-transform: uppercase;">Signes</th> <!-- Nouvelle colonne -->
+                    <th style="width: 10%; padding: 1rem; font-size: 0.85rem; color: #666; font-weight: 600; text-transform: uppercase;">Date</th>
+                    <th style="width: 15%; padding: 1rem; font-size: 0.85rem; color: #666; font-weight: 600; text-align: center;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for article in articles %}
+                <tr style="border-bottom: 1px solid #e0e0e0;">
+                    <td style="padding: 1rem; text-align: center;">
+                        <input type="checkbox" name="article_ids" value="{{ article.pk }}" style="transform: scale(1.5);">
+                    </td>
+                    <td style="padding: 1rem;">
+                        <a href="{% url 'articles:detail_article' article.pk %}" style="color: #0056b3; text-decoration: none; font-weight: 500;">
+                            {{ article.titre }}
+                        </a>
+                    </td>
+                    <td style="padding: 1rem;">{{ article.get_type_article_display|default:article.type_article }}</td>
+                    <td style="padding: 1rem; line-height: 1.2;">
+                        <strong>{{ article.redacteur.get_signature }}</strong>
+                    </td>
+                    <td style="padding: 1rem; font-weight: bold; color: #555;">
+                        {{ article.version_courante.nombre_signes|default:0 }}
+                    </td>
+                    <td style="padding: 1rem;">{{ article.date_modification|date:"d/m/Y" }}</td>
+                    <td style="padding: 1rem; text-align: center;">
+                        <button type="submit" formaction="{% url 'articles:ajouter_au_numero' article.pk %}" class="btn btn-primary btn-sm">Ajouter</button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 2rem; color: #888;">
+                        Aucun article validé en attente de sélection.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </form>
+    {% include '_pagination.html' %}
+</div>
+
+<script>
+    function toggleAll(source) {
+        // On sélectionne toutes les cases qui ont le name="article_ids"
+        var checkboxes = document.querySelectorAll('input[name="article_ids"]');
+        // On coche ou décoche selon l'état de la case "Tout sélectionner"
+        for (var i = 0; i < checkboxes.length; i++) {
+            checkboxes[i].checked = source.checked;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const selectAll = document.getElementById('select-all');
+        const checkboxes = document.querySelectorAll('input[name="article_ids"]');
+
+        if (selectAll) {
+            selectAll.addEventListener('change', function() {
+                checkboxes.forEach(cb => cb.checked = selectAll.checked);
+            });
+
+            // Bonus : si on décoche manuellement une case, on décoche le "tout sélectionner"
+            checkboxes.forEach(cb => {
+                cb.addEventListener('change', function() {
+                    if (!this.checked) {
+                        selectAll.checked = false;
+                    } else if (document.querySelectorAll('input[name="article_ids"]:checked').length === checkboxes.length) {
+                        selectAll.checked = true;
+                    }
+                });
+            });
+        }
+    });
+</script>
+
+{% endblock %}

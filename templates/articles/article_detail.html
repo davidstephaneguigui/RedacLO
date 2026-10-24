@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% load typographie %}
+
+{% block titre %}{{ article.titre }} — RedacLo{% endblock %}
+
+{% block contenu %}
+    <!-- TITRE ET MÉTADONNÉES -->
+    <h2 style="margin-bottom: 0.5rem;">{{ article.titre }}</h2>
+    
+    <div style="font-size: 0.9rem; color: var(--c-text-muted); margin-bottom: 1rem; display: flex; flex-wrap: wrap; gap: 1rem; align-items: center;">
+        <span><strong>Rédacteur :</strong> {{ article.redacteur.get_signature }}</span>
+        <span>|</span>
+        <span><strong>Créé le :</strong> {{ article.date_creation|date:"d/m/Y à H:i" }}</span>
+        <span>|</span>
+        <span><strong>Modifié le :</strong> {{ article.date_modification|date:"d/m/Y à H:i" }}</span>
+        <span>|</span>
+        <span class="statut-{{ article.statut }}" style="font-weight: bold;">
+            {{ article.get_statut_display }}
+        </span>
+    </div>
+
+    <!-- ACTIONS POUR L'ÉDITEUR ET L'ADMIN -->
+    {% if user.role == "editeur" or user.role == "admin" %}
+        <div class="actions" style="margin-top: 1rem; margin-bottom: 2rem; background: var(--c-surface-alt); padding: 1rem; border-radius: 4px;">
+            {% if user.role == "editeur" or user.role == "admin" %}
+                <a href="{% url 'articles:liste_versions' article.pk %}" class="btn btn-sm btn-secondary">Voir toutes les versions</a>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    <hr style="border: 0; border-top: 1px solid var(--c-border); margin: 1.5rem 0;">
+
+    <!-- CONTENU DU TEXTE -->
+    <div class="texte-article-simple">
+        {% for paragraphe in texte_affiche %}
+            <p>{{ paragraphe|typographier }}</p>
+        {% endfor %}
+    </div>
+
+    <!-- RELECTURES (S'IL Y EN A) -->
+    {% if reviews %}
+        <h3 style="margin-top: 2rem;">Relectures</h3>
+        <ul style="list-style: none; padding: 0;">
+            {% for review in reviews %}
+                <li style="margin-bottom: 0.5rem; background: var(--c-surface-alt); padding: 0.5rem 1rem; border-radius: 4px;">
+                    <strong class="rel-{{ review.relecteur.couleur }}">{{ review.relecteur.username }}</strong>
+                    — {{ review.get_decision_display }}
+                    {% if review.commentaire %}
+                        <br><em style="font-size: 0.9rem; color: var(--c-text-muted);">« {{ review.commentaire }} »</em>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <!-- BOUTONS D'ACTION (UN SEUL BLOC, TOUT EN BAS) -->
+    <div class="actions" style="margin-top: 3rem; border-top: 1px solid var(--c-border); padding-top: 1.5rem;">
+        
+        {% if article.statut == 'brouillon' and request.user == article.redacteur %}
+            <form method="post" action="{% url 'articles:soumettre_article' article.pk %}" style="display: inline-block; margin-right: 1rem;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary">Soumettre l'article</button>
+            </form>
+        {% endif %}
+
+        {% if user.est_redacteur %}
+            <a href="{% url 'articles:mes_articles' %}" class="btn btn-secondary">
+                Retour à mes articles
+            </a>
+        {% else %}
+            <a href="{% url 'reviews:a_relire' %}" class="btn btn-secondary">
+                Retour à la liste
+            </a>
+        {% endif %}
+
+        <a href="{% url 'core:accueil' %}" class="btn btn-ghost">
+            Retour à l'accueil
+        </a>
+        
+    </div>
+{% endblock %}

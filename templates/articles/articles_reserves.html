@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% load url_utils %}
+
+{% block contenu %}
+<div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); width: 100%; box-sizing: border-box;">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h1 style="margin: 0; font-size: 1.5rem; color: #333;">Articles réservés pour les numéros suivants</h1>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        
+        <!-- Barre d'actions au-dessus du tableau -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+            
+            <!-- BLOC DE GAUCHE : Actions sur les réservés -->
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+               
+                <button type="submit" name="action" value="remettre" class="btn btn-primary">
+                    Remettre dans "À choisir"
+                </button>
+                <a href="{% url 'articles:choisir' %}" class="btn btn-secondary">
+                    &larr; Retour à la sélection
+                </a>
+            </div>
+
+            <!-- BLOC DE DROITE : Actions vers le numéro en cours -->
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <button type="submit" name="action" value="ajouter" class="btn btn-primary">
+                    Choisir pour le numéro {% if numero_en_cours %}n°{{ numero_en_cours.numero }}{% endif %}
+                </button>
+                <a href="{% url 'publications:composition' %}" class="btn btn-tertiary">
+                    Aller vers la composition &rarr;
+                </a>
+            </div>
+        </div>
+
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+            <thead style="background-color: #f4f6f8; border-bottom: 2px solid #e0e0e0;">
+                <tr>
+                    <th style="width: 5%; padding: 1rem; text-align: center;">
+                        <input type="checkbox" id="select-all" style="transform: scale(1.5); cursor: pointer;" title="Tout sélectionner">
+                    </th>
+                    <th style="width: 45%; padding: 1rem; font-size: 0.85rem; color: #666; font-weight: 600; text-transform: uppercase;">Titre</th>
+                    <th style="width: 15%; padding: 1rem; font-size: 0.85rem; color: #666; font-weight: 600; text-transform: uppercase;">Rédacteur</th>
+                    <th style="width: 15%; padding: 1rem; font-size: 0.85rem; color: #666; font-weight: 600; text-transform: uppercase;">Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for article in articles %}
+                <tr style="border-bottom: 1px solid #e0e0e0;">
+                    <td style="padding: 1rem; text-align: center;">
+                        <input type="checkbox" name="article_ids" value="{{ article.pk }}" style="transform: scale(1.5);">
+                    </td>
+                    <td style="padding: 1rem;">
+                        <a href="{% url 'articles:detail_article' article.pk %}" style="color: #0056b3; text-decoration: none; font-weight: 500;">
+                            {{ article.titre }}
+                        </a>
+                    </td>
+                    <td style="padding: 1rem; line-height: 1.2;">
+                        <strong>{{ article.redacteur.get_signature }}</strong>
+                    </td>
+                    <td style="padding: 1rem;">{{ article.date_modification|date:"d/m/Y" }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" style="text-align: center; padding: 2rem; color: #888;">
+                        Aucun article réservé pour le moment.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </form>
+    {% include '_pagination.html' %}
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const selectAll = document.getElementById('select-all');
+    const checkboxes = document.querySelectorAll('input[name="article_ids"]');
+
+    if (selectAll) {
+        selectAll.addEventListener('change', function() {
+            checkboxes.forEach(cb => cb.checked = selectAll.checked);
+        });
+
+        checkboxes.forEach(cb => {
+            cb.addEventListener('change', function() {
+                if (!this.checked) {
+                    selectAll.checked = false;
+                } else if (document.querySelectorAll('input[name="article_ids"]:checked').length === checkboxes.length) {
+                    selectAll.checked = true;
+                }
+            });
+        });
+    }
+});
+</script>
+
+{% endblock %}

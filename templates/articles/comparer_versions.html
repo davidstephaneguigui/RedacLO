@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block main_class %}main-large{% endblock %}
+
+{% block contenu %}
+<h1>Comparer les versions — {{ article.titre }}</h1>
+
+{% if message %}
+    <p class="message-avertissement">{{ message }}</p>
+    {% if user.role == "editeur" or user.role == "admin" %}
+        <p><a href="{% url 'articles:liste_versions' article.pk %}">Retour à la liste des versions</a></p>
+    {% endif %}
+{% else %}
+
+    {# --- Sélecteurs de versions --- #}
+    <form method="get" class="comparaison-selecteurs">
+        <label>Version 1 :
+            <select name="v1">
+                {% for v in groupe %}
+                    <option value="{{ v.pk }}" {% if v.pk == v1.pk %}selected{% endif %}>
+                        v{{ v.numero }} — {{ v.auteur_modification.username|default:"?" }}
+                    </option>
+                {% endfor %}
+            </select>
+        </label>
+
+        <label>Version 2 :
+            <select name="v2">
+                {% for v in groupe %}
+                    <option value="{{ v.pk }}" {% if v.pk == v2.pk %}selected{% endif %}>
+                        v{{ v.numero }} — {{ v.auteur_modification.username|default:"?" }}
+                    </option>
+                {% endfor %}
+            </select>
+        </label>
+
+        <button type="submit">Comparer</button>
+    </form>
+
+    {# --- Bascule diff / propre --- #}
+    <p class="comparaison-bascule">
+        {% if mode == "diff" %}
+            <a href="?v1={{ v1.pk }}&v2={{ v2.pk }}&mode=propre">Voir le texte propre</a>
+        {% else %}
+            <a href="?v1={{ v1.pk }}&v2={{ v2.pk }}&mode=diff">Voir les différences</a>
+        {% endif %}
+    </p>
+
+    {# --- Affichage côte à côte --- #}
+    <div class="comparaison">
+        <div class="comparaison-colonne">
+            <h2>v{{ v1.numero }} — {{ v1.auteur_modification.username|default:"?" }}</h2>
+            <div class="comparaison-texte">
+                {% if mode == "diff" %}
+                    {{ v1_diff|safe }}
+                {% else %}
+                    {{ v1.contenu|linebreaks }}
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="comparaison-colonne">
+            <h2>v{{ v2.numero }} — {{ v2.auteur_modification.username|default:"?" }}</h2>
+            <div class="comparaison-texte">
+                {% if mode == "diff" %}
+                    {{ v2_diff|safe }}
+                {% else %}
+                    {{ v2.contenu|linebreaks }}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <p><a href="{% url 'articles:liste_versions' article.pk %}">Retour à la liste des versions</a></p>
+{% endif %}
+{% endblock %}

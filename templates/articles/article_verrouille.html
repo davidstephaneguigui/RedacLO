@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block titre %}Article verrouillé — RedacLo{% endblock %}
+
+{% block contenu %}
+    <h2>Article verrouillé</h2>
+    <p>Cet article a le statut « {{ article.get_statut_display }} » et ne peut plus être modifié.</p>
+    <p><a href="{% url 'articles:detail_article' article.pk %}">Voir l'article</a></p>
+{% endblock %}

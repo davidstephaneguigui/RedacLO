@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block titre %}Publications — RedacLo{% endblock %}
+
+{% block contenu %}
+    <h2>Publications</h2>
+    <p>Cette page est réservée aux éditeurs.</p>
+    <p>Votre rôle : {{ user.get_role_display }}.</p>
+{% endblock %}
