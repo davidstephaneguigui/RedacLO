@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block titre %}Tableau des numéros — RedacLo{% endblock %}
+
+{% block contenu %}
+<div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h2 style="margin: 0; color: #333;">📋 Tableau des numéros</h2>
+            <p style="margin: 0.2rem 0 0 0; color: #666; font-size: 0.9rem;">Fenêtre du N°{{ min_num }} au N°{{ max_num }}</p>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+            <a href="{% url 'publications:archives_numeros' %}" class="btn btn-secondary">📁 Voir les archives</a>
+            
+            <form method="post" action="{% url 'publications:creer_numero' %}" style="margin: 0;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-success">➕ Créer le numéro suivant</button>
+            </form>
+            <a href="{% url 'publications:composition' %}" class="btn btn-primary">&larr; Retour au numéro en cours</a>
+        </div>
+    </div>
+
+    {% regroup publications by annee as annee_list %}
+
+    {% for annee in annee_list %}
+        <div style="margin-bottom: 2rem;">
+            <h3 style="color: #555; border-bottom: 2px solid #eee; padding-bottom: 0.5rem; margin-bottom: 1rem;">
+                Année {{ annee.grouper|default:"Non définie" }}
+            </h3>
+            
+            <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
+                {% for pub in annee.list %}
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem; width: 200px;">
+                        
+                        <!-- La carte -->
+                        <a href="{% url 'publications:composition' %}?numero_id={{ pub.pk }}" 
+                           style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 0.5rem; border-radius: 8px; text-decoration: none; padding: 1rem; transition: transform 0.2s; width: 100%;
+                                  background-color: {% if pub.statut == 'en_cours' %}#007bff{% elif pub.statut == 'gele' %}#fff9c4{% else %}#e2e3e5{% endif %};
+                                  color: {% if pub.statut == 'en_cours' %}#fff{% elif pub.statut == 'gele' %}#856404{% else %}#383d41{% endif %};
+                                  border: 1px solid {% if pub.statut == 'en_cours' %}#0056b3{% elif pub.statut == 'gele' %}#ffeeba{% else %}#d6d8db{% endif %};
+                                  box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                            
+                            <span style="font-size: 1.3rem; font-weight: bold;">N° {{ pub.numero }}</span>
+                            <span style="font-size: 0.8rem; opacity: 0.8;">{{ pub.date|date:"d/m/Y" }}</span>
+                            
+                            <span style="font-size: 0.7rem; background: rgba(0,0,0,0.1); padding: 0.2rem 0.5rem; border-radius: 4px; margin-top: 0.3rem;">
+                                {{ pub.get_statut_display }}
+                            </span>
+                        </a>
+
+                        <!-- Boutons d'action -->
+                        {% if pub.statut == 'publie' and pub.numero >= num_semaine %}
+                            <form method="post" action="{% url 'publications:decloturer_numero' pub.pk %}" style="margin: 0;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-secondary" style="width: 100%;" onclick="return confirm('Rouvrir ce numéro ?');">
+                                    🔓 Rouvrir
+                                </button>
+                            </form>
+                        {% elif pub.statut == 'gele' %}
+                            <form method="post" action="{% url 'publications:reprendre_numero' pub.pk %}" style="margin: 0;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-warning" style="width: 100%; background-color: #ffeeba; border-color: #ffdf7e; color: #856404;" onclick="return confirm('Passer ce numéro en cours ?');">
+                                    ▶ Reprendre
+                                </button>
+                            </form>
+                        {% endif %}
+
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% empty %}
+        <p>Aucun numéro dans cette fenêtre.</p>
+    {% endfor %}
+</div>
+{% endblock %}

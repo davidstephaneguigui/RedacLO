@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block titre %}Archives — RedacLo{% endblock %}
+
+{% block contenu %}
+<div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <h2 style="margin: 0; color: #333;">📁 Archives des numéros</h2>
+            <p style="margin: 0.2rem 0 0 0; color: #666; font-size: 0.9rem;">Numéros antérieurs à la fenêtre de travail actuelle.</p>
+        </div>
+        <div>
+            <a href="{% url 'publications:numeros' %}" class="btn btn-secondary">&larr; Retour au tableau de bord</a>
+        </div>
+    </div>
+
+    {% regroup publications by annee as annee_list %}
+
+    {% for annee in annee_list %}
+        <div style="margin-bottom: 2rem;">
+            <h3 style="color: #555; border-bottom: 2px solid #eee; padding-bottom: 0.5rem; margin-bottom: 1rem;">
+                Année {{ annee.grouper }}
+            </h3>
+            
+            <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
+                {% for pub in annee.list %}
+                    <!-- [COPIE ICI LE BLOC <div style="display: flex; flex-direction: column; gap: 0.5rem; width: 200px;"> ... </div> DE TA CARTE] -->
+                {% endfor %}
+            </div>
+        </div>
+    {% empty %}
+        <p>Aucune archive disponible pour le moment.</p>
+    {% endfor %}
+</div>
+{% endblock %}

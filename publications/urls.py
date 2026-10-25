@@ -17,4 +17,10 @@ urlpatterns = [
     path("organiser/<int:page_id>/", views.organiser_page, name="organiser_page"),
     path("organiser/", views.organiser_index, name="organiser_index"), # Route pour la vue globale (onglet du menu)
     path("organiser/<int:page_id>/", views.organiser_page, name="organiser_page"), # Route pour le clic sur une page spécifique
+    path("cloturer/", views.cloturer_numero, name="cloturer_numero"),
+    path("decloturer/<int:pk>/", views.decloturer_numero, name="decloturer_numero"),
+    path("creer-numero/", views.creer_numero, name="creer_numero"),
+    path("reprendre/<int:pk>/", views.reprendre_numero, name="reprendre_numero"),
+    path("numeros/", views.numeros, name="numeros"),
+    path("archives/", views.archives_numeros, name="archives_numeros"),
 ]

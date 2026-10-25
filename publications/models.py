@@ -14,19 +14,31 @@ class GabaritPage(models.Model):
 
 
 class Rubrique(models.Model):
-    nom = models.CharField(max_length=100, unique=True)
-    position = models.PositiveIntegerField(default=0, help_text="Ordre d'affichage dans les listes")
+    nom = models.CharField(max_length=100, verbose_name="Nom de la rubrique")
+    position = models.PositiveIntegerField(default=0, verbose_name="Position")
+    
+    publication = models.ForeignKey(
+        'Publication', 
+        on_delete=models.CASCADE, 
+        null=True, 
+        blank=True, 
+        related_name="rubriques_diverses",
+        verbose_name="Rattachée au numéro"
+    )
 
     class Meta:
-        ordering = ["position", "nom"]
+        ordering = ["position"]
+        verbose_name = "Rubrique"
+        verbose_name_plural = "Rubriques"
 
     def __str__(self):
         return self.nom
 
-
+    
 class Publication(models.Model):
     STATUTS = [
         ("en_cours", "En cours de bouclage"),
+        ("gele", "Gelé"),
         ("publie", "Publié"),
     ]
     

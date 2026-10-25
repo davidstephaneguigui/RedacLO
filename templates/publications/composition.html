@@ -7,17 +7,58 @@
     
     <!-- 1. L'EN-TÊTE -->
     <div style="margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid #e0e0e0;">
-        <h2 style="margin: 0 0 0.5rem 0; font-size: 1.5rem; color: #333;">Chemin de fer : n° {{ numero.numero }}</h2>
-        <p style="font-style: italic; color: #666; margin: 0 0 1rem 0;">
-            Semaine n°{{ numero_semaine }}, {{ dates_semaine }}
-        </p>
-        <div style="display: flex; justify-content: flex-start; align-items: center; gap: 1rem;">
+        
+        <!-- Ligne du haut : Titre à gauche, Bouton Archives à droite -->
+        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div>
+                <h2 style="margin: 0 0 0.5rem 0; font-size: 1.5rem; color: #333;">Chemin de fer : n° {{ numero.numero }}</h2>
+                <p style="font-style: italic; color: #666; margin: 0;">
+                    Semaine n°{{ numero_semaine }}, {{ dates_semaine }}
+                </p>
+            </div>
+
+            <!-- Boutons Nouveau numéro & Archives -->
+            <div style="display: flex; gap: 0.5rem;">
+                <!-- Bouton Nouveau Numéro -->
+                <a href="{% url 'publications:numeros' %}" class="btn btn-secondary" style="font-weight: bold;">
+                    📋 Tableau des numéros
+                </a>
+            </div>
+        </div>
+
+        <!-- Ligne du bas : Boutons d'action -->
+        <div style="margin-top: 1rem; display: flex; justify-content: flex-start; align-items: center; gap: 1rem;">
             <a href="{% url 'articles:choisir' %}" class="btn btn-secondary">&larr; Retour aux articles à choisir</a>
             
-            <!-- LE BOUTON POUR AFFICHER OU MASQUER LE VIVIER -->
             <button type="button" class="btn btn-primary" id="btn-toggle-vivier" onclick="toggleVivier()">
                 {% if articles %}Masquer le vivier{% else %}Afficher le vivier{% endif %}
             </button>
+
+            {% if numero.numero == num_semaine %}
+                {% if numero.statut == 'en_cours' %}
+                    <form method="post" action="{% url 'publications:cloturer_numero' %}" style="margin: 0;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger"
+                                onclick="return confirm('Clôturer définitivement ce numéro ?');">
+                            Clôturer ce numéro
+                        </button>
+                    </form>
+                {% elif numero.statut == 'publie' %}
+                    <form method="post" action="{% url 'publications:decloturer_numero' numero.pk %}" style="margin: 0;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-warning"
+                                onclick="return confirm('Rouvrir ce numéro pour le modifier ?');">
+                            ↩ Dé-clôturer ce numéro
+                        </button>
+                    </form>
+                {% endif %}
+            {% endif %}
+
+            {% if lecture_seule %}
+                <div style="background: #fff3cd; border: 1px solid #ffc107; padding: 0.8rem; border-radius: 6px; margin-bottom: 1rem; color: #856404;">
+                    ⚠️ Ce numéro (n° {{ numero.numero }}) est clôturé. Il est en lecture seule.
+                </div>
+            {% endif %}
         </div>
     </div>
 
@@ -122,25 +163,26 @@
                                 border: 1px solid {% if page.total_signes >= page.limite_signes|add:'-100' %}#a5d6a7{% else %}#e0e0e0{% endif %}; 
                                 padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">                        
                         
-                            <!-- En-tête de la page : Numéro et compteur -->
-                            <div class="entete-page" style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-weight: bold; cursor: pointer;" 
-                                 onclick="window.location='{% url 'publications:organiser_page' page.pk %}'" 
-                                 title="Cliquez pour organiser cette page">
-                                <span class="numero-page">Page {{ page.numero_page }} {% if page.gabarit %}({{ page.gabarit.nom }}){% endif %}</span>
-                                <span class="compteur-signes" ...>
-                                    {{ page.total_signes }} / {{ page.limite_signes }} signes
-                                </span>
+                        <!-- En-tête de la page : Numéro et compteur -->
+                        <div class="entete-page" style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-weight: bold; cursor: pointer;" 
+                                onclick="window.location='{% url 'publications:organiser_page' page.pk %}'" 
+                                title="Cliquez pour organiser cette page">
+                            <span class="numero-page">Page {{ page.numero_page }} {% if page.gabarit %}({{ page.gabarit.nom }}){% endif %}</span>
+                            <span class="compteur-signes" ...>
+                                {{ page.total_signes }} / {{ page.limite_signes }} signes
+                            </span>
+                        </div>
+                
+                        <!-- Message de confirmation pour les pages pleines -->
+                        {% if page.total_signes >= page.limite_signes|add:'-100' %}
+                            <div style="text-align: center; color: #2e7d32; font-size: 0.85rem; font-weight: bold; margin-bottom: 0.5rem;">
+                                Contenu défini pour cette page
                             </div>
-                        
-                            <!-- Message de confirmation pour les pages pleines -->
-                            {% if page.total_signes >= page.limite_signes|add:'-100' %}
-                                <div style="text-align: center; color: #2e7d32; font-size: 0.85rem; font-weight: bold; margin-bottom: 0.5rem;">
-                                    Contenu défini pour cette page
-                                </div>
-                            {% endif %}
+                        {% endif %}
                         
                         <!-- Gestion des illustrations ET DE LA RUBRIQUE (VERSION COMPACTE) -->
-                        <form method="GET" action="{% url 'publications:composition' %}" style="font-size: 0.8rem; margin-bottom: 0.5rem; background: #f4f6f8; padding: 0.4rem; border-radius: 4px; display: flex; flex-direction: column; gap: 0.3rem;">
+                        <form method="GET" action="{% url 'publications:composition' %}?numero_id={{ numero.pk }}#page-{{ page.pk }}" style="font-size: 0.8rem; margin-bottom: 0.5rem; background: #f4f6f8; padding: 0.4rem; border-radius: 4px; display: flex; flex-direction: column; gap: 0.3rem;">
+                            <input type="hidden" name="numero_id" value="{{ numero.pk }}"> <!-- le champ caché pour éviter la redirection -->
                             <input type="hidden" name="page_id" value="{{ page.pk }}">
                             
                             <!-- LIGNE 1 : Titre + Compteurs -->
@@ -155,24 +197,44 @@
                                 </div>
                             </div>
 
-                            <!-- LIGNE 2 : Rubrique + Bouton OK -->
+                            <!-- LIGNE 2 : Rubrique + Bouton OK + Modifier -->
                             {% if page.numero_page > 2 %}
-                            <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                <label style="margin: 0; white-space: nowrap;">Rubrique :</label>
-                                <select name="rubrique" class="select-rubrique" style="padding: 1px; border: 1px solid #ccc; flex-grow: 1; font-size: 0.8rem;">
-                                    <option value="">-- Choisir --</option>
-                                    {% for rubrique in rubriques %}
-                                        <option value="{{ rubrique.pk }}" {% if page.rubrique and page.rubrique.pk == rubrique.pk %}selected{% endif %}>
-                                            {{ rubrique.nom }}
-                                        </option>
-                                    {% endfor %}
-                                </select>
-                                <button type="submit" class="btn btn-sm btn-secondary" style="padding: 1px 8px; font-size: 0.75rem;">OK</button>
-                            </div>
+                                <div style="display: flex; gap: 0.5rem; align-items: center; flex-grow: 1; max-width: 350px;">
+                                    
+                                    <select name="rubrique" class="select-rubrique" onchange="gererActionRubrique(this, {{ page.pk }})" style="padding: 2px; border: 1px solid #ccc; flex-grow: 1; min-width: 0;">
+                                        <option value="">-- Choisir --</option>
+                                        
+                                        <optgroup label="Rubriques récurrentes">
+                                            {% for rubrique in rubriques_recurrentes %}
+                                                <option value="{{ rubrique.pk }}" {% if page.rubrique and page.rubrique.pk == rubrique.pk %}selected{% endif %}>
+                                                    {{ rubrique.nom }}
+                                                </option>
+                                            {% endfor %}
+                                        </optgroup>
+
+                                        <optgroup label="Rubriques diverses (ce numéro)">
+                                            {% for rubrique in rubriques_diverses %}
+                                                <option value="{{ rubrique.pk }}" {% if page.rubrique and page.rubrique.pk == rubrique.pk %}selected{% endif %}>
+                                                    {{ rubrique.nom }}
+                                                </option>
+                                            {% endfor %}
+                                        </optgroup>
+
+                                        <optgroup label="Actions spéciales">
+                                            <option value="ACTION_ANNIVERSAIRE">➕ Anniversaire (créer)</option>
+                                            <option value="ACTION_MODIFIER">✎ Rubrique à modifier</option>
+                                        </optgroup>
+                                    </select>
+                                    
+                                    <button type="submit" class="btn btn-sm btn-secondary" style="padding: 2px 8px; font-size: 0.75rem; margin: 0;">OK</button>
+                                    
+                                </div>
+
                             {% else %}
-                            <div style="display: flex; justify-content: flex-end;">
-                                <button type="submit" class="btn btn-sm btn-secondary" style="padding: 1px 8px; font-size: 0.75rem;">OK</button>
-                            </div>
+                                <!-- Pour les pages 1 et 2, on aligne juste le bouton OK à droite -->
+                                <div style="display: flex; justify-content: flex-end; width: 100%; margin-top: 0.3rem;">
+                                    <button type="submit" class="btn btn-sm btn-secondary" style="padding: 2px 8px; font-size: 0.75rem;">OK</button>
+                                </div>
                             {% endif %}
                         </form>
 
@@ -344,4 +406,38 @@
             }
         });
     </script>
+
+    <!-- TROISIEME SCRIPT : Gérer les rubriques -->
+    <script>
+        function gererActionRubrique(select, pageId) {
+            const val = select.value;
+            // On crée un objet URL basé sur la page actuelle
+            const url = new URL(window.location.href);
+            
+            if (val === 'ACTION_ANNIVERSAIRE') {
+                const nom = prompt("Quel est le nom de la rubrique ? (ex: Il y a 70 ans)");
+                if (nom) {
+                    url.searchParams.set('page_id', pageId);
+                    url.searchParams.set('action_rubrique', 'anniversaire');
+                    url.searchParams.set('nom_rubrique', nom);
+                    url.hash = 'page-' + pageId; // Pour rester sur la bonne page
+                    window.location.href = url.href;
+                } else {
+                    select.value = ""; 
+                }
+            } else if (val === 'ACTION_MODIFIER') {
+                const nom = prompt("Nouveau nom pour la rubrique de cette page :");
+                if (nom) {
+                    url.searchParams.set('page_id', pageId);
+                    url.searchParams.set('action_rubrique', 'modifier');
+                    url.searchParams.set('nom_rubrique', nom);
+                    url.hash = 'page-' + pageId;
+                    window.location.href = url.href;
+                } else {
+                    select.value = ""; 
+                }
+            }
+        }
+    </script>
+
 {% endblock %}

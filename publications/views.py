@@ -4,12 +4,25 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.utils import timezone
-from django.db.models import Max
 from django.http import JsonResponse
 from accounts.decorators import role_required
 from .models import Publication, Page, Rubrique, GabaritPage
 from articles.models import Article
 from datetime import date, timedelta
+
+# On définit une date de référence pour la numérotation des publications
+DATE_REFERENCE = date(2026, 10, 19)  # Lundi de la semaine 43 de l'année 2026 : numéro 3038.
+NUMERO_REFERENCE = 3038
+
+def numero_pour_semaine(d):
+    """Retourne le numéro de publication correspondant à la semaine de la date d."""
+    lundi = d - timedelta(days=d.weekday())
+    nb_semaines = (lundi - DATE_REFERENCE).days // 7
+    return NUMERO_REFERENCE + nb_semaines
+
+
+def numero_semaine_actuelle():
+    return numero_pour_semaine(date.today())
 
 
 @role_required("editeur", "membre_redaction", "admin")
@@ -19,76 +32,144 @@ def liste_publications(request):
 
 @role_required("editeur", "admin")
 def composition_numero(request):
-    # 1. On récupère ou crée le numéro en cours
-    numero_en_cours = Publication.objects.filter(statut="en_cours").first()
-    if not numero_en_cours:
-        numero_en_cours = Publication.objects.create(
-            numero=Publication.prochain_numero(), 
-            volume=1, 
-            statut="en_cours", 
-            date=timezone.localdate()
-        )
-    
+    # 1. On récupère le numéro demandé, ou celui en cours par défaut
+    num_semaine = numero_semaine_actuelle()
+    numero_id = request.GET.get("numero_id")
+
+    if numero_id:
+        numero_en_cours = Publication.objects.filter(pk=numero_id).first()
+        if not numero_en_cours:
+            messages.error(request, "Ce numéro n'existe pas.")
+            return redirect("publications:composition")
+    else:
+        # --- C'EST CE BLOC ELSE QU'ON MODIFIE ---
+        # 1. On cherche d'abord s'il y a un numéro explicitement "en_cours"
+        numero_en_cours = Publication.objects.filter(statut="en_cours").first()
+        
+        # 2. Si on n'en trouve pas, on cherche celui de la semaine actuelle
+        if not numero_en_cours:
+            numero_en_cours = Publication.objects.filter(numero=num_semaine).first()
+            
+        # 3. Si on ne trouve toujours rien, on le crée
+        if not numero_en_cours:
+            numero_en_cours = Publication.objects.create(
+                numero=num_semaine,
+                volume=1,
+                statut="en_cours",
+                date=timezone.localdate()
+            )
+        # 4. NOUVEAU : Si le numéro qu'on a trouvé est "Gelé", on l'active 
+        #    puisqu'il n'y a aucun autre numéro "en cours".
+        elif numero_en_cours.statut == "gele":
+            numero_en_cours.statut = "en_cours"
+            numero_en_cours.save()
+        # ----------------------------------------
+
+    # On détermine si le numéro est clôturé (lecture seule)
+    lecture_seule = (numero_en_cours.statut == "publie")
+
     # 2. Génération des 16 pages si vides
-    if numero_en_cours.pages.count() == 0:
+    if numero_en_cours.pages.count() == 0 and numero_en_cours.statut != "publie":
         for i in range(1, 17):
             Page.objects.create(publication=numero_en_cours, numero_page=i)
 
-    # 3. TRAITEMENT DU FORMULAIRE (Illustrations ET Rubrique)
+      # =========================================================
+    # 3. GESTION DES ACTIONS SPÉCIALES (Anniversaire / Modifier)
+    # =========================================================
+    action_rubrique = request.GET.get("action_rubrique")
     page_id = request.GET.get("page_id")
+    nom_rubrique = request.GET.get("nom_rubrique")
+
+    # ⬅️ Blocage en lecture seule
+    if lecture_seule and action_rubrique and page_id:
+        messages.error(request, "Ce numéro est clôturé et ne peut plus être modifié.")
+        return redirect(f"/publications/composition/?numero_id={numero_en_cours.pk}#page-{page_id}")
+
+    if action_rubrique and page_id and nom_rubrique:
+        p = Page.objects.filter(pk=page_id).first()
+        if p:
+            if action_rubrique == "anniversaire":
+                nouvelle_rub = Rubrique.objects.create(
+                    nom=nom_rubrique,
+                    publication=numero_en_cours,
+                    position=99
+                )
+                p.rubrique = nouvelle_rub
+                p.save()
+                messages.success(request, f"Rubrique diverse « {nom_rubrique} » créée et assignée.")
+            elif action_rubrique == "modifier":
+                if p.rubrique and p.rubrique.publication == numero_en_cours:
+                    p.rubrique.nom = nom_rubrique
+                    p.rubrique.save()
+                    messages.success(request, f"Rubrique renommée en « {nom_rubrique} ».")
+                else:
+                    messages.error(request, "Vous ne pouvez pas renommer une rubrique récurrente de cette façon.")
+
+        return redirect(f"/publications/composition/?numero_id={numero_en_cours.pk}&page_id={p.pk}#page-{p.pk}")
+
+    # =========================================================
+    # 4. TRAITEMENT DU FORMULAIRE CLASSIQUE (Illustrations / Rubrique)
+    # =========================================================
     petites = request.GET.get("petites")
     grandes = request.GET.get("grandes")
     rubrique = request.GET.get("rubrique")
-    
+
+    # Blocage en lecture seule
+    if lecture_seule and page_id and (petites is not None or grandes is not None or rubrique is not None):
+        messages.error(request, "Ce numéro est clôturé et ne peut plus être modifié.")
+        return redirect(f"/publications/composition/?numero_id={numero_en_cours.pk}#page-{page_id}")
+
     if page_id and (petites is not None or grandes is not None or rubrique is not None):
         p = Page.objects.filter(pk=page_id).first()
         if p:
             val_p = int(petites) if petites else 0
             val_g = int(grandes) if grandes else 0
-            
-            # Contrainte : max 3 au total ET max 2 grandes
+
             if val_p + val_g > 3 or val_g > 2:
                 messages.error(request, f"Règles non respectées pour la page {p.numero_page} : maximum 3 illustrations au total, dont 2 grandes maximum.")
             else:
                 p.petites_illustrations = val_p
                 p.grandes_illustrations = val_g
-                
-                # NOUVEAU : Sauvegarde de la rubrique
+
                 if rubrique:
                     p.rubrique_id = rubrique
                 else:
                     p.rubrique = None
-                
+
                 p.save()
                 messages.success(request, f"Paramètres mis à jour pour la page {p.numero_page}.")
-            
-            return redirect("publications:composition")
-    
-    # 4. Affichage normal
+
+            # Préserve numero_id ET l'ancre
+            return redirect(f"/publications/composition/?numero_id={numero_en_cours.pk}&page_id={p.pk}#page-{p.pk}")
+
+    # =========================================================
+    # 5. AFFICHAGE NORMAL
+    # =========================================================
     pages = numero_en_cours.pages.all().order_by("numero_page")
-    
+
     articles_disponibles = Article.objects.filter(
         statut_selection="disponible"
     ).exclude(
         pages__publication=numero_en_cours
     ).order_by('-date_modification')
 
-    # --- CALCUL DES COMPTEURS DE SIGNES ---
     capacite_totale = sum(page.limite_signes() for page in pages)
     signes_places = sum(page.total_signes() for page in pages)
     signes_restants = capacite_totale - signes_places
-    
+
     signes_vivier = 0
     for article in articles_disponibles:
         version = article.versions.filter(statut="validee").first()
         if version:
             signes_vivier += version.nombre_signes()
 
-    # --- CALCUL DE LA SEMAINE ---
-    aujourd_hui = date.today()
-    lundi = aujourd_hui - timedelta(days=aujourd_hui.weekday())
+    # --- CALCUL DE LA SEMAINE EN FONCTION DU NUMÉRO ---
+    date_ref_lundi = date(2026, 10, 19)
+    decalage_semaines = numero_en_cours.numero - 3038
+    lundi = date_ref_lundi + timedelta(weeks=decalage_semaines)
     vendredi = lundi + timedelta(days=4)
-    numero_semaine = aujourd_hui.isocalendar()[1]
+    numero_semaine = lundi.isocalendar()[1]
+    annee_affichage = lundi.year
 
     MOIS_FR = {
         1: 'janvier', 2: 'février', 3: 'mars', 4: 'avril', 5: 'mai', 6: 'juin',
@@ -98,24 +179,27 @@ def composition_numero(request):
     mois_vendredi = MOIS_FR[vendredi.month]
 
     if lundi.month == vendredi.month:
-        dates_semaine = f"du {lundi.day} au {vendredi.day} {mois_lundi} {lundi.year}"
+        dates_semaine = f"du {lundi.day} au {vendredi.day} {mois_lundi} {annee_affichage}"
     else:
-        dates_semaine = f"du {lundi.day} {mois_lundi} au {vendredi.day} {mois_vendredi} {vendredi.year}"
+        dates_semaine = f"du {lundi.day} {mois_lundi} au {vendredi.day} {mois_vendredi} {annee_affichage}"
 
-    # --- RUBRIQUES ---
-    rubriques = Rubrique.objects.all().order_by('position')
+    rubriques_recurrentes = Rubrique.objects.filter(publication__isnull=True).order_by('position')
+    rubriques_diverses = Rubrique.objects.filter(publication=numero_en_cours).order_by('position')
 
     return render(request, "publications/composition.html", {
         "numero": numero_en_cours,
         "pages": pages,
         "articles": articles_disponibles,
+        "rubriques_recurrentes": rubriques_recurrentes,
+        "rubriques_diverses": rubriques_diverses,
         "numero_semaine": numero_semaine,
         "dates_semaine": dates_semaine,
         "capacite_totale": capacite_totale,
         "signes_places": signes_places,
         "signes_restants": signes_restants,
         "signes_vivier": signes_vivier,
-        "rubriques": rubriques,
+        "lecture_seule": lecture_seule,
+        "num_semaine": num_semaine,
     })
 
 
@@ -331,4 +415,146 @@ def organiser_index(request):
         "pages": pages
     })
 
+
+@role_required("editeur", "admin")
+@require_POST
+def cloturer_numero(request):
+    # 1. On cherche le numéro qui est ACTUELLEMENT en cours
+    numero = Publication.objects.filter(statut="en_cours").first()
+
+    if numero:
+        # 2. On clôture (publie) ce numéro
+        numero.statut = "publie"
+        numero.save()
+        
+        # 3. On cherche le numéro suivant (N+1) qui doit déjà exister en base
+        prochain_num = numero.numero + 1
+        pub_suivante = Publication.objects.filter(numero=prochain_num).first()
+        
+        if pub_suivante:
+            # 4. S'il existe, il passe en cours
+            pub_suivante.statut = "en_cours"
+            pub_suivante.save()
+            messages.success(request, f"Le numéro n°{numero.numero} a été clôturé. Le numéro n°{pub_suivante.numero} est maintenant en cours.")
+        else:
+            # 5. S'il n'existe pas, on ne crée rien. On avertit.
+            messages.warning(request, f"Le numéro n°{numero.numero} a été clôturé, mais le numéro n°{prochain_num} n'existe pas encore.")
+            
+    else:
+        messages.error(request, "Aucun numéro en cours à clôturer.")
+        
+    return redirect("publications:composition")
+
+
+@role_required("editeur", "admin")
+@require_POST
+def decloturer_numero(request, pk):
+    publication = get_object_or_404(Publication, pk=pk)
+    
+    if publication.statut != "publie":
+        messages.warning(request, "Ce numéro n'est pas publié.")
+        return redirect("publications:archives_publications")
+
+    # On cherche si le numéro suivant est actuellement en cours
+    prochain_num = publication.numero + 1
+    pub_suivante = Publication.objects.filter(numero=prochain_num, statut="en_cours").first()
+
+    # Si le suivant est en cours, on le repasse en "Gelé" pour libérer la place
+    if pub_suivante:
+        pub_suivante.statut = "gele"
+        pub_suivante.save()
+        messages.info(request, f"Le numéro n°{pub_suivante.numero} a été repassé en 'Gelé'.")
+
+    # On remet le numéro clôturé en "En cours"
+    publication.statut = "en_cours"
+    publication.save()
+    messages.success(request, f"Le numéro n°{publication.numero} a été rouvert en cours.")
+        
+    return redirect("publications:archives_publications")
+
+
+@role_required("editeur", "admin")
+@require_POST
+def creer_numero(request):
+    # On trouve le numéro le plus grand existant
+    dernier_num = Publication.objects.all().order_by('-numero').first()
+    prochain_num = (dernier_num.numero + 1) if dernier_num else 3038
+    
+    # On le crée en statut "Gelé"
+    nouvelle_pub = Publication.objects.create(
+        numero=prochain_num,
+        volume=1,
+        statut="gele",
+        date=timezone.localdate()
+    )
+    messages.success(request, f"Le numéro n°{prochain_num} a été créé (Gelé). Vous pouvez maintenant y placer des articles.")
+    
+    # On redirige directement dessus
+    return redirect(f"/publications/composition/?numero_id={nouvelle_pub.pk}")
+
+
+@role_required("editeur", "admin")
+@require_POST
+def reprendre_numero(request, pk):
+    pub_cible = get_object_or_404(Publication, pk=pk)
+    
+    if pub_cible.statut == "en_cours":
+        messages.warning(request, "Ce numéro est déjà en cours.")
+        return redirect(f"/publications/composition/?numero_id={pub_cible.pk}")
+
+    # On gèle l'ancien numéro en cours s'il y en a un
+    ancien_en_cours = Publication.objects.filter(statut="en_cours").first()
+    if ancien_en_cours:
+        ancien_en_cours.statut = "gele"
+        ancien_en_cours.save()
+        messages.info(request, f"Le numéro n°{ancien_en_cours.numero} a été gelé.")
+
+    # On active le nouveau
+    pub_cible.statut = "en_cours"
+    pub_cible.save()
+    messages.success(request, f"Le numéro n°{pub_cible.numero} est maintenant en cours de bouclage.")
+    
+    return redirect(f"/publications/composition/?numero_id={pub_cible.pk}")
+
+
+@role_required("editeur", "admin")
+def numeros(request):
+    # On détermine le centre de la fenêtre : le numéro en cours, ou la semaine actuelle
+    num_central = Publication.objects.filter(statut="en_cours").first()
+    num_ref = num_central.numero if num_central else numero_semaine_actuelle()
+    
+    # Fenêtre glissante : de -4 à +4 semaines
+    min_num = num_ref - 4
+    max_num = num_ref + 4
+    
+    publications = Publication.objects.filter(
+        numero__gte=min_num, 
+        numero__lte=max_num
+    ).order_by('numero')
+    
+    return render(request, "publications/numeros.html", {
+        "publications": publications,
+        "num_semaine": numero_semaine_actuelle(),
+        "min_num": min_num,
+        "max_num": max_num,
+    })
+
+
+@role_required("editeur", "admin")
+def archives_numeros(request):
+    # On détermine le centre de la fenêtre (le numéro en cours)
+    num_central = Publication.objects.filter(statut="en_cours").first()
+    num_ref = num_central.numero if num_central else numero_semaine_actuelle()
+    
+    # Archives : on ne garde que ce qui est antérieur à la fenêtre (donc <= -5 semaines)
+    max_num = num_ref - 5
+    
+    publications = Publication.objects.filter(
+        numero__lte=max_num
+    ).order_by('-numero')
+    
+    return render(request, "publications/archives_numeros.html", {
+        "publications": publications,
+        "num_semaine": numero_semaine_actuelle(),
+    })
 

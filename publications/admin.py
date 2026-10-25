@@ -22,7 +22,8 @@ class PageAdmin(admin.ModelAdmin):
 
 @admin.register(Rubrique)
 class RubriqueAdmin(admin.ModelAdmin):
-    list_display = ("nom", "position")
+    list_display = ("nom", "position", "publication")
+    list_filter = ("publication",)
     ordering = ("position",)
 
 
