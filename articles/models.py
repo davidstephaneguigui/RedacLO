@@ -122,8 +122,6 @@ class Article(models.Model):
         verbose_name="Second validateur (mandataire)"
     )
 
-    ordre_sur_page = models.PositiveIntegerField(default=1, verbose_name="Ordre sur la page")
-
     def version_courante(self):
         """Retourne la version la plus récente de l'article."""
         return self.versions.order_by("-numero").first()

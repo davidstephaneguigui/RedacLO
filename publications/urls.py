@@ -9,6 +9,7 @@ urlpatterns = [
     path("composition/utiliser/<int:pk>/", views.utiliser_article, name="utiliser_article"),
     path("composition/reserver/<int:pk>/", views.reserver_article, name="reserver_article"),
     path("composition/page/<int:page_id>/placer/<int:article_id>/", views.placer_article_page, name="placer_article_page"),
+    path("composition/page/<int:page_id>/continuite/<int:article_id>/", views.modifier_continuite_article, name="modifier_continuite_article"),
     path("composition/page/<int:page_id>/retirer/<int:article_id>/", views.retirer_article_page, name="retirer_article_page"),
     path("composition/placer/<int:article_id>/", views.placer_article_page, name="placer_article_page"),
     path("composition/renvoyer-selection/", views.renvoyer_a_selection, name="renvoyer_a_selection"),
@@ -21,6 +22,6 @@ urlpatterns = [
     path("decloturer/<int:pk>/", views.decloturer_numero, name="decloturer_numero"),
     path("creer-numero/", views.creer_numero, name="creer_numero"),
     path("reprendre/<int:pk>/", views.reprendre_numero, name="reprendre_numero"),
-    path("numeros/", views.numeros, name="numeros"),
+    path("numeros/", views.liste_numeros, name="numeros"),
     path("archives/", views.archives_numeros, name="archives_numeros"),
 ]

@@ -1,0 +1,30 @@
+@media (max-width: 900px) {
+    .menu-burger { display: block; }
+    .nav-left { display: none; position: absolute; top: 100%; left: 0; width: 100%; flex-direction: column; align-items: flex-start; background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--radius); padding: 1rem; margin-top: 0.5rem; z-index: 100; box-shadow: var(--shadow-md); }
+    .nav-left.active { display: flex; }
+    .main-nav { position: relative; flex-wrap: wrap; align-items: flex-start; }
+    .btn-desktop-only { display: none !important; }
+    .comparaison { grid-template-columns: 1fr; }
+    .layout-composition { flex-direction: column; }
+    .vivier { position: static; flex: none; width: 100%; max-height: none; margin-bottom: 1.5rem; }
+    .grille-pages { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+    
+    .table-responsive-cards { display: block; width: 100%; }
+    .table-responsive-cards thead { display: none; }
+    .table-responsive-cards tbody, .table-responsive-cards tr, .table-responsive-cards td { display: block; width: 100%; }
+    .table-responsive-cards tr { margin-bottom: 1.5rem; border: 1px solid var(--c-border); border-radius: var(--radius); background: var(--c-surface); box-shadow: var(--shadow-sm); padding: 1rem; }
+    .table-responsive-cards td { display: flex; justify-content: space-between; align-items: center; text-align: right; padding: 0.8rem 0; border-bottom: 1px solid var(--c-surface-alt); height: auto; }
+    .table-responsive-cards td:last-child { border-bottom: none; padding-bottom: 0; }
+    .table-responsive-cards td::before { content: attr(data-label); display: inline-block; font-weight: bold; color: var(--c-text-muted); font-size: 0.85rem; text-transform: uppercase; margin-right: 1rem; flex-shrink: 0; }
+    .table-responsive-cards .cellule-interne { display: block; height: auto; text-align: right; flex-grow: 1; }
+    .table-responsive-cards td[data-label="Titre"] { display: block; text-align: left; min-height: 6rem; padding-top: 0.2rem; padding-bottom: 1rem; }
+    .table-responsive-cards td[data-label="Titre"]::before { display: block; margin-bottom: 0.3rem; }
+    .table-responsive-cards td[data-label="Titre"] .cellule-interne { text-align: left; }
+    .table-responsive-cards td[data-label="Titre"] .texte-tronque { display: block; -webkit-line-clamp: unset; line-clamp: unset; overflow: visible; }
+    .champ-fichier { flex-direction: column; align-items: flex-start !important; gap: 0.2rem !important; }
+}
+
+@media (max-width: 600px) {
+    .pagination { flex-direction: column; align-items: stretch; }
+    .pagination-links { justify-content: center; flex-wrap: wrap; }
+}

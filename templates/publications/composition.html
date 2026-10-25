@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block main_class %}main-large{% endblock %}
 {% block titre %}Chemin de fer — RedacLo{% endblock %}
@@ -248,43 +249,71 @@
 
                         <!-- Articles sur la page -->
                         <div class="articles-sur-page">
-                            {% for article in page.articles_tries %}
-                                <div class="mini-carte" data-article-id="{{ article.pk }}" data-ordre="{{ article.ordre_sur_page }}" 
-                                        style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; padding: 0.4rem; background: #f9f9f9; border-radius: 4px; margin-bottom: 0.3rem; font-size: 0.9rem;">
-                                    
-                                    <!-- COMPTEUR D'ORDRE (Boutons Monter / Descendre) -->
-                                    <div style="display: flex; align-items: center; gap: 0.2rem;">
-                                        <form method="post" action="{% url 'publications:changer_ordre_article' page.pk article.pk %}" onsubmit="return false;" style="margin: 0;">
-                                            {% csrf_token %}
-                                            <input type="hidden" name="ordre" value="{{ article.ordre_sur_page|add:'-1' }}">
-                                            <button type="button" onclick="soumettreOrdre(this)" style="background:none; border:1px solid #ccc; border-radius: 4px; cursor:pointer; padding: 2px 6px; font-size: 0.7rem;" 
-                                                    {% if article.ordre_sur_page <= 1 %}disabled{% endif %}>▲</button>
-                                        </form>
+                            {% for pa in page.articles_lies.all %}
+                                {% with article=pa.article %}
+                                    <div class="mini-carte" data-article-id="{{ article.pk }}" data-ordre="{{ pa.position }}" 
+                                            style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; padding: 0.4rem; background: #f9f9f9; border-radius: 4px; margin-bottom: 0.3rem; font-size: 0.9rem;">
+                                        
+                                        <!-- COMPTEUR D'ORDRE (Boutons Monter / Descendre) -->
+                                        <div style="display: flex; align-items: center; gap: 0.2rem;">
+                                            <!-- Bouton Monter -->
+                                            <form method="post" action="{% url 'publications:changer_ordre_article' page.pk article.pk %}" style="margin: 0;">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="ordre" value="{{ pa.position|add:'-1' }}">
+                                                <button type="submit" style="background:none; border:1px solid #ccc; border-radius: 4px; cursor:pointer; padding: 2px 6px; font-size: 0.7rem;" 
+                                                        {% if pa.position <= 1 %}disabled{% endif %}>▲</button>
+                                            </form>
 
-                                        <span style="font-weight: bold; font-size: 0.85rem; width: 20px; text-align: center; color: #555;">
-                                            {{ article.ordre_sur_page }}
+                                            <span style="font-weight: bold; font-size: 0.85rem; width: 20px; text-align: center; color: #555;">
+                                                {{ pa.position }}
+                                            </span>
+
+                                            <!-- Bouton Descendre -->
+                                            <form method="post" action="{% url 'publications:changer_ordre_article' page.pk article.pk %}" style="margin: 0;">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="ordre" value="{{ pa.position|add:'1' }}">
+                                                <button type="submit" style="background:none; border:1px solid #ccc; border-radius: 4px; cursor:pointer; padding: 2px 6px; font-size: 0.7rem;">▼</button>
+                                            </form>
+                                        </div>
+                                        
+                                        <!-- Dans la boucle page.articles_lies.all -->
+                                        <span style="flex-grow: 1;">
+                                            {{ article.titre }} <br>
+                                            <small style="color: #888; font-size: 0.8rem;">
+                                                Signes sur cette page : 
+                                                <input type="number" value="{% if pa.signes_sur_page is not None %}{{ pa.signes_sur_page }}{% else %}{{ article.version_courante.nombre_signes }}{% endif %}" 
+                                                    style="width: 60px; font-size: 0.7rem; padding: 1px;">
+                                            </small>
                                         </span>
 
-                                        <form method="post" action="{% url 'publications:changer_ordre_article' page.pk article.pk %}" onsubmit="return false;" style="margin: 0;">
+                                        <!-- GESTION DE LA CONTINUITÉ -->
+                                        <div style="display: flex; gap: 0.5rem; margin-top: 0.2rem; font-size: 0.75rem;">
+                                            <!-- Bouton "Commence ici" -->
+                                            <form method="post" action="{% url 'publications:modifier_continuite_article' page.pk article.pk %}" style="margin: 0;">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="champ" value="debut">
+                                                <button type="submit" style="background:none; border:none; cursor:pointer; padding: 0; color: {% if pa.est_debut %}#2e7d32{% else %}#999{% endif %}; font-weight: {% if pa.est_debut %}bold{% else %}normal{% endif %};" title="Cet article commence-t-il sur cette page ?">
+                                                    {% if pa.est_debut %}▼ Début{% else %}▽ Début{% endif %}
+                                                </button>
+                                            </form>
+
+                                            <!-- Bouton "Finit ici" -->
+                                            <form method="post" action="{% url 'publications:modifier_continuite_article' page.pk article.pk %}" style="margin: 0;">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="champ" value="fin">
+                                                <button type="submit" style="background:none; border:none; cursor:pointer; padding: 0; color: {% if pa.est_fin %}#2e7d32{% else %}#999{% endif %}; font-weight: {% if pa.est_fin %}bold{% else %}normal{% endif %};" title="Cet article se termine-t-il sur cette page ?">
+                                                    {% if pa.est_fin %}▼ Fin{% else %}▽ Fin{% endif %}
+                                                </button>
+                                            </form>
+                                        </div>
+                                        
+                                        <!-- BOUTON RETIRER (Croix rouge) -->
+                                        <form method="post" action="{% url 'publications:retirer_article_page' page.pk article.pk %}" style="display:inline; margin: 0;">
                                             {% csrf_token %}
-                                            <input type="hidden" name="ordre" value="{{ article.ordre_sur_page|add:'1' }}">
-                                            <button type="button" onclick="soumettreOrdre(this)" style="background:none; border:1px solid #ccc; border-radius: 4px; cursor:pointer; padding: 2px 6px; font-size: 0.7rem;">▼</button>
+                                            <button type="submit" style="background:none; border:none; color:red; cursor:pointer;" title="Retirer de la page (vers le vivier)">✕</button>
                                         </form>
                                     </div>
-                                    
-                                    <span style="flex-grow: 1;">
-                                        {{ article.titre }} 
-                                        <small style="color: #888; font-weight: normal; font-size: 0.8rem;">
-                                            ({{ article.version_courante.nombre_signes|default:0 }} signes)
-                                        </small>
-                                    </span>
-                                    
-                                    <!-- BOUTON RETIRER (Croix rouge) -->
-                                    <form method="post" action="{% url 'publications:retirer_article_page' page.pk article.pk %}" style="display:inline; margin: 0;">
-                                        {% csrf_token %}
-                                        <button type="submit" style="background:none; border:none; color:red; cursor:pointer;" title="Retirer de la page (vers le vivier)">✕</button>
-                                    </form>
-                                </div>
+                                {% endwith %}
                             {% empty %}
                                 <p style="font-size: 0.8rem; color: #999; font-style: italic; margin-top: 1rem;">Page vide</p>
                             {% endfor %}
@@ -295,149 +324,7 @@
         </div> <!-- FERMETURE de chemin-de-fer -->
     </div> <!-- FERMETURE de layout-composition -->
 
-    <!-- PREMIER SCRIPT : Changement d'ordre -->
-    <script>
-        function soumettreOrdre(btn) {
-            const form = btn.closest('form');
-            const formData = new FormData(form);
-            const articleId = form.id.replace('form-ordre-', '');
-            const pageId = form.closest('.bloc-page').id.replace('page-', '');
-
-            fetch(form.action, {
-                method: 'POST',
-                body: formData,
-                headers: { 'X-CSRFToken': formData.get('csrfmiddlewaretoken') }
-            }).then(response => {
-                if (response.ok) {
-                    const pageDiv = document.getElementById('page-' + pageId);
-                    const conteneur = pageDiv.querySelector('.articles-sur-page');
-                    let cartes = Array.from(conteneur.querySelectorAll('.mini-carte'));
-                    const newOrdre = parseInt(formData.get('ordre'));
-
-                    const indexActuel = cartes.findIndex(c => c.getAttribute('data-article-id') === String(articleId));
-                    if (indexActuel !== -1) {
-                        const carte = cartes.splice(indexActuel, 1)[0];
-                        const nouvellePosition = Math.min(Math.max(newOrdre - 1, 0), cartes.length);
-                        cartes.splice(nouvellePosition, 0, carte);
-                    }
-
-                    cartes.forEach((c, index) => {
-                        c.setAttribute('data-ordre', index + 1);
-                        conteneur.appendChild(c);
-                    });
-                    
-                    const currentScroll = window.scrollY;
-                    localStorage.setItem('scrollPos', currentScroll);
-                    window.location.reload(); 
-                }
-            }).catch(error => console.error('Erreur:', error));
-        }
-
-        function toggleVivier() {
-            var vivier = document.getElementById('vivier-container');
-            var actions = document.getElementById('actions-vivier');
-            var btn = document.getElementById('btn-toggle-vivier');
-            
-            if (vivier.style.display === 'none') {
-                vivier.style.display = 'block';
-                if (actions) actions.style.display = 'flex'; // Affiche la barre d'actions
-                btn.innerHTML = 'Masquer le vivier';
-            } else {
-                vivier.style.display = 'none';
-                if (actions) actions.style.display = 'none'; // Masque la barre d'actions
-                btn.innerHTML = 'Afficher le vivier';
-            }
-        }
-
-        // Masquer la barre d'actions si le vivier est masqué au chargement
-        document.addEventListener('DOMContentLoaded', function() {
-            var vivier = document.getElementById('vivier-container');
-            var actions = document.getElementById('actions-vivier');
-            
-            if (vivier && vivier.style.display === 'none') {
-                if (actions) actions.style.display = 'none';
-            }
-        });
-        
-        window.addEventListener('load', function() {
-            // 1. Si on a une ancre dans l'URL
-            if (window.location.hash) {
-                const targetId = window.location.hash.substring(1); // Enlève le #
-                const targetElement = document.getElementById(targetId);
-                
-                if (targetElement) {
-                    // On scrolle vers l'élément avec un petit décalage pour voir le haut de la page
-                    const yOffset = -100; 
-                    const y = targetElement.getBoundingClientRect().top + window.pageYOffset + yOffset;
-                    window.scrollTo({top: y, behavior: 'instant'});
-                }
-                // On s'arrête là, on ne restaure pas le localStorage
-                return;
-            }
-
-            // 2. Sinon, restauration du scroll pour le changement d'ordre
-            if (localStorage.getItem('scrollPos')) {
-                window.scrollTo(0, parseInt(localStorage.getItem('scrollPos')));
-                localStorage.removeItem('scrollPos');
-            }
-        });
-    </script>
-
-    <!-- DEUXIÈME SCRIPT : Tout sélectionner -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const selectAll = document.getElementById('select-all-composer');
-            const checkboxes = document.querySelectorAll('input[name="article_ids"]');
-
-            if (selectAll) {
-                selectAll.addEventListener('change', function() {
-                    checkboxes.forEach(cb => cb.checked = selectAll.checked);
-                });
-
-                checkboxes.forEach(cb => {
-                    cb.addEventListener('change', function() {
-                        if (!this.checked) {
-                            selectAll.checked = false;
-                        } else if (document.querySelectorAll('input[name="article_ids"]:checked').length === checkboxes.length) {
-                            selectAll.checked = true;
-                        }
-                    });
-                });
-            }
-        });
-    </script>
-
-    <!-- TROISIEME SCRIPT : Gérer les rubriques -->
-    <script>
-        function gererActionRubrique(select, pageId) {
-            const val = select.value;
-            // On crée un objet URL basé sur la page actuelle
-            const url = new URL(window.location.href);
-            
-            if (val === 'ACTION_ANNIVERSAIRE') {
-                const nom = prompt("Quel est le nom de la rubrique ? (ex: Il y a 70 ans)");
-                if (nom) {
-                    url.searchParams.set('page_id', pageId);
-                    url.searchParams.set('action_rubrique', 'anniversaire');
-                    url.searchParams.set('nom_rubrique', nom);
-                    url.hash = 'page-' + pageId; // Pour rester sur la bonne page
-                    window.location.href = url.href;
-                } else {
-                    select.value = ""; 
-                }
-            } else if (val === 'ACTION_MODIFIER') {
-                const nom = prompt("Nouveau nom pour la rubrique de cette page :");
-                if (nom) {
-                    url.searchParams.set('page_id', pageId);
-                    url.searchParams.set('action_rubrique', 'modifier');
-                    url.searchParams.set('nom_rubrique', nom);
-                    url.hash = 'page-' + pageId;
-                    window.location.href = url.href;
-                } else {
-                    select.value = ""; 
-                }
-            }
-        }
-    </script>
+    <!-- Mes scripts js -->
+    <script src="{% static 'js/composition.js' %}" defer></script>
 
 {% endblock %}

@@ -96,7 +96,6 @@ class Page(models.Model):
     publication = models.ForeignKey(Publication, on_delete=models.CASCADE, related_name="pages")
     numero_page = models.PositiveIntegerField()
     rubrique = models.ForeignKey(Rubrique, on_delete=models.SET_NULL, null=True, blank=True)
-    articles = models.ManyToManyField("articles.Article", related_name="pages", blank=True)
     titre_une = models.CharField(max_length=200, blank=True)
     
     # Deux champs pour les illustrations
@@ -112,17 +111,20 @@ class Page(models.Model):
 
     def total_signes(self):
         total = 0
-        for article in self.articles.all():
-            # On prend la version validée de l'article pour compter les signes
-            v = article.versions.filter(statut="validee").first()
-            if v:
-                total += v.nombre_signes()
+        for pa in self.articles_lies.all():
+            if pa.signes_sur_page is not None:
+                total += pa.signes_sur_page
+            else:
+                version = pa.article.version_courante()
+                if version:
+                    total += version.nombre_signes()
         return total
 
     def articles_tries(self):
         """Retourne les articles de la page triés par ordre d'apparition."""
         # On trie par ordre_sur_page. Si l'ordre est identique (ex: 0), on trie par date.
-        return self.articles.all().order_by('ordre_sur_page', 'date_creation')
+        # return self.articles.all().order_by('ordre_sur_page', 'date_creation')
+        return [pa.article for pa in self.articles_lies.all().order_by('position')]
 
     def limite_signes(self):
         p = self.petites_illustrations
@@ -148,3 +150,25 @@ class Page(models.Model):
     def nombre_illustrations(self):
         """Retourne le nombre total d'illustrations sur la page."""
         return self.petites_illustrations + self.grandes_illustrations
+
+
+class PageArticle(models.Model):
+    page = models.ForeignKey('Page', on_delete=models.CASCADE, related_name="articles_lies")
+    article = models.ForeignKey('articles.Article', on_delete=models.CASCADE, related_name="placements")
+    
+    position = models.PositiveIntegerField(default=1, verbose_name="Ordre sur la page")
+    est_debut = models.BooleanField(default=True, verbose_name="Commence sur cette page")
+    est_fin = models.BooleanField(default=True, verbose_name="Finit sur cette page")
+
+    # Permet de forcer le nombre de signes sur cette page
+    signes_sur_page = models.PositiveIntegerField(null=True, blank=True, verbose_name="Signes sur cette page (optionnel)")
+
+    class Meta:
+        ordering = ["position"]
+        unique_together = ('page', 'article')
+        verbose_name = "Article sur page"
+
+    def __str__(self):
+        return f"{self.article.titre} (P.{self.page.numero_page} - Pos {self.position})"
+
+    

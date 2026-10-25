@@ -1,0 +1,17 @@
+/* 4. LAYOUT GLOBAL */
+header, footer, main { max-width: 95%; margin-left: auto; margin-right: auto; padding: var(--s-4) var(--s-5); }
+main { background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--radius-lg); padding: var(--s-6); box-shadow: var(--shadow-sm); }
+main.main-large { max-width: 95% !important; width: 95% !important; margin: 0 auto !important; padding: var(--s-4) var(--s-5) !important; background: var(--c-surface) !important; border: 1px solid var(--c-border) !important; box-shadow: var(--shadow-sm) !important; }
+header { margin-bottom: 0; }
+footer { margin-top: var(--s-6); padding: var(--s-4) 0; font-size: 0.85rem; color: var(--c-text-muted); text-align: center; }
+
+.header-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.8rem; }
+.site-title { margin: 0; font-size: 1.5rem; }
+.site-title a { color: var(--c-primary); text-decoration: none; }
+.site-title a:hover { text-decoration: none; color: var(--c-primary-dark); }
+.user-greeting { margin: 0; font-size: 0.95rem; color: var(--c-text-muted); }
+
+.main-nav { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--c-border); border-bottom: 1px solid var(--c-border); padding: 0.6rem 0; margin-bottom: 1.5rem; }
+.nav-left { display: flex; align-items: center; gap: 0.5rem; }
+.nav-right { display: flex; align-items: center; }
+.menu-burger { display: none; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--c-text); }

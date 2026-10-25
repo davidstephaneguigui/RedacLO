@@ -1,0 +1,49 @@
+/* 1. VARIABLES */
+:root {
+    --c-primary:       #2563eb;
+    --c-primary-dark:  #1e40af;
+    --c-primary-soft:  #dbeafe;
+    --c-success:       #16a34a;
+    --c-success-soft:  #dcfce7;
+    --c-danger:        #dc2626;
+    --c-danger-dark:   #991b1b;
+    --c-danger-soft:   #fee2e2;
+    --c-warning:       #d97706;
+    --c-warning-soft:  #fef3c7;
+    --c-text:          #1f2937;
+    --c-text-muted:    #6b7280;
+    --c-text-light:    #9ca3af;
+    --c-bg:            #f9fafb;
+    --c-surface:       #ffffff;
+    --c-surface-alt:   #f3f4f6;
+    --c-border:        #e5e7eb;
+    --c-border-strong: #d1d5db;
+    --s-1: 0.25rem; --s-2: 0.5rem; --s-3: 0.75rem; --s-4: 1rem;
+    --s-5: 1.5rem; --s-6: 2rem; --s-8: 3rem;
+    --font-sans:  system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    --font-serif: Georgia, "Times New Roman", serif;
+    --radius-sm: 4px; --radius: 6px; --radius-lg: 10px;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+}
+
+/* 2. RESET ET BASE */
+*, *::before, *::after { box-sizing: border-box; }
+body {
+    margin: 0;
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--c-text);
+    background-color: var(--c-bg);
+}
+
+/* 3. TYPOGRAPHIE */
+h1, h2, h3, h4 { margin: 0 0 var(--s-3) 0; line-height: 1.25; font-weight: 600; color: var(--c-text); }
+h1 { font-size: 1.5rem; color: var(--c-primary); }
+h2 { font-size: 1.25rem; margin-top: var(--s-5); }
+h3 { font-size: 1.05rem; margin-top: var(--s-4); }
+p { margin: 0 0 var(--s-4) 0; }
+a { color: var(--c-primary); text-decoration: none; }
+a:hover { text-decoration: underline; }
+small { font-size: 0.875rem; color: var(--c-text-muted); }

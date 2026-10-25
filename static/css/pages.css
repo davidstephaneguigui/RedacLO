@@ -1,0 +1,13 @@
+/* 11. COMPARAISON ET CHEMIN DE FER */
+.comparaison { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-5); width: 100%; margin-top: var(--s-4); }
+.comparaison-colonne { min-width: 0; border: 1px solid var(--c-border); border-radius: var(--radius); padding: var(--s-4); background: var(--c-surface); }
+.comparaison-texte { font-family: var(--font-serif); line-height: 1.7; white-space: pre-wrap; word-wrap: break-word; font-size: 0.95rem; }
+
+.layout-composition { display: flex; gap: 2rem; margin-top: 1.5rem; align-items: flex-start; width: 100%; }
+.vivier { flex: 0 0 320px; background: var(--c-surface); padding: 1rem; border-radius: var(--radius-lg); border: 1px solid var(--c-border); box-shadow: var(--shadow-sm); position: sticky; top: 1rem; max-height: calc(100vh - 2rem); overflow-y: auto; }
+.chemin-de-fer { flex: 1; min-width: 0; }
+.grille-pages { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem; }
+.bloc-page { border: 2px dashed var(--c-border-strong); border-radius: var(--radius); padding: 1.2rem; background: var(--c-surface); min-height: 450px; display: flex; flex-direction: column; transition: all 0.2s ease; }
+.page-une { border: 2px solid var(--c-primary); background: var(--c-primary-soft); }
+.entete-page { display: flex; justify-content: space-between; font-size: 0.9rem; font-weight: bold; color: var(--c-text-muted); margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--c-border); }
+.mini-carte { background: var(--c-surface-alt); border: 1px solid var(--c-border-strong); padding: 0.6rem 0.8rem; border-radius: var(--radius-sm); margin-bottom: 0.6rem; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; }
