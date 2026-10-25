@@ -1,5 +1,8 @@
 {% extends "base.html" %}
+
 {% load url_utils %}
+
+{% load static %}
 
 {% block contenu %}
 <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); width: 100%; box-sizing: border-box;">
@@ -76,27 +79,6 @@
     {% include '_pagination.html' %}
 </div>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const selectAll = document.getElementById('select-all');
-    const checkboxes = document.querySelectorAll('input[name="article_ids"]');
-
-    if (selectAll) {
-        selectAll.addEventListener('change', function() {
-            checkboxes.forEach(cb => cb.checked = selectAll.checked);
-        });
-
-        checkboxes.forEach(cb => {
-            cb.addEventListener('change', function() {
-                if (!this.checked) {
-                    selectAll.checked = false;
-                } else if (document.querySelectorAll('input[name="article_ids"]:checked').length === checkboxes.length) {
-                    selectAll.checked = true;
-                }
-            });
-        });
-    }
-});
-</script>
+<script src="{% static 'js/selection.js' %}" defer></script>
 
 {% endblock %}

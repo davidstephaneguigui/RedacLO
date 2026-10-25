@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% load url_utils %}
 
+{% load static %}
+
 {% block contenu %}
 <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); width: 100%; box-sizing: border-box;">
     
@@ -75,8 +77,30 @@
                         {{ article.version_courante.nombre_signes|default:0 }}
                     </td>
                     <td style="padding: 1rem;">{{ article.date_modification|date:"d/m/Y" }}</td>
-                    <td style="padding: 1rem; text-align: center;">
-                        <button type="submit" formaction="{% url 'articles:ajouter_au_numero' article.pk %}" class="btn btn-primary btn-sm">Ajouter</button>
+                    <td data-label="Action">
+                        <div style="display: flex; gap: 0.5rem; justify-content: center; align-items: center;">
+                            
+                            <!-- Formulaire Ajouter -->
+                            <form id="form-ajouter-{{ article.pk }}" method="post" action="{% url 'articles:ajouter_au_numero' article.pk %}" style="margin: 0;">
+                                {% csrf_token %}
+                            </form>
+                            
+                            <!-- Bouton Ajouter (largeur fixe de 85px) -->
+                            <button type="submit" form="form-ajouter-{{ article.pk }}" class="btn btn-sm btn-primary" style="width: 85px; display: flex; justify-content: center; align-items: center;">
+                                Ajouter
+                            </button>
+
+                            <!-- Formulaire Annuler -->
+                            <form id="form-annuler-{{ article.pk }}" method="post" action="{% url 'articles:annuler_validation' article.pk %}" style="margin: 0;">
+                                {% csrf_token %}
+                            </form>
+                            
+                            <!-- Bouton Annuler (largeur fixe de 85px) -->
+                            <button type="submit" form="form-annuler-{{ article.pk }}" class="btn btn-sm btn-secondary" style="width: 85px; display: flex; justify-content: center; align-items: center;">
+                                Annuler
+                            </button>
+                            
+                        </div>
                     </td>
                 </tr>
                 {% empty %}
@@ -92,37 +116,6 @@
     {% include '_pagination.html' %}
 </div>
 
-<script>
-    function toggleAll(source) {
-        // On sélectionne toutes les cases qui ont le name="article_ids"
-        var checkboxes = document.querySelectorAll('input[name="article_ids"]');
-        // On coche ou décoche selon l'état de la case "Tout sélectionner"
-        for (var i = 0; i < checkboxes.length; i++) {
-            checkboxes[i].checked = source.checked;
-        }
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        const selectAll = document.getElementById('select-all');
-        const checkboxes = document.querySelectorAll('input[name="article_ids"]');
-
-        if (selectAll) {
-            selectAll.addEventListener('change', function() {
-                checkboxes.forEach(cb => cb.checked = selectAll.checked);
-            });
-
-            // Bonus : si on décoche manuellement une case, on décoche le "tout sélectionner"
-            checkboxes.forEach(cb => {
-                cb.addEventListener('change', function() {
-                    if (!this.checked) {
-                        selectAll.checked = false;
-                    } else if (document.querySelectorAll('input[name="article_ids"]:checked').length === checkboxes.length) {
-                        selectAll.checked = true;
-                    }
-                });
-            });
-        }
-    });
-</script>
+<script src="{% static 'js/selection.js' %}" defer></script>
 
 {% endblock %}
