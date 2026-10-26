@@ -47,6 +47,7 @@ class Article(models.Model):
         ("breve", "Brève"),
         ("echo", "Écho"),
         ("courrier", "Courrier des lecteurs"),
+        ("article_editorial", "Éditorial"),
     ]
 
     # Champs de base
@@ -85,7 +86,7 @@ class Article(models.Model):
         related_name="+"
     )
 
-    # --- NOUVEAUX CHAMPS POUR LA DOUBLE VALIDATION ---
+    # Champs pour la double validation
     valide_1_par = models.ForeignKey(
         settings.AUTH_USER_MODEL, 
         on_delete=models.SET_NULL, 
@@ -103,7 +104,7 @@ class Article(models.Model):
         verbose_name="Second validateur"
     )
 
-    # ... NOUVEAUX CHAMPS POUR LA VALIDATION PAR MANDATAIRE ---
+    # Champs pour la validation par mandataire (si le rédacteur est un mandataire)
 
     valide_1_mandataire = models.ForeignKey(
         settings.AUTH_USER_MODEL, 
@@ -120,6 +121,16 @@ class Article(models.Model):
         blank=True, 
         related_name="articles_mandates_2",
         verbose_name="Second validateur (mandataire)"
+    )
+
+    # Lier un article réservé à un numéro futur spécifique
+    numero_reserve = models.ForeignKey(
+        'publications.Publication', 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='articles_reserves',
+        verbose_name="Réservé pour le numéro"
     )
 
     def version_courante(self):

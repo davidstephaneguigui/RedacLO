@@ -116,7 +116,7 @@ def liste_numeros(request):
         numero__lte=max_num
     ).order_by('numero')
     
-    return render(request, "publications/numeros.html", {
+    return render(request, "publications/liste_numeros.html", {
         "publications": publications,
         "num_semaine": numero_semaine_actuelle(),
         "min_num": min_num,

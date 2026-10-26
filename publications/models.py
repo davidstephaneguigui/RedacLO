@@ -102,23 +102,18 @@ class Page(models.Model):
         return [pa.article for pa in self.articles_lies.all().order_by('position')]
 
     def limite_signes(self):
+        # Règle spéciale pour la page Éditorial (Page 2)
+        if self.numero_page == 2:
+            return 6000
+
         p = self.petites_illustrations
         g = self.grandes_illustrations
         
-        # Règle sans illustration
-        if p == 0 and g == 0: return 7500
-        # Règles 1 illustration
-        if p == 1 and g == 0: return 7000
-        if p == 0 and g == 1: return 6700
-        # Règles 2 illustrations
-        if p == 2 and g == 0: return 6500
-        if p == 1 and g == 1: return 6200
-        if p == 0 and g == 2: return 5900
-        # Règles 3 illustrations
-        if p == 3 and g == 0: return 6000
-        if p == 2 and g == 1: return 5700
-        # Si combinaison non prévue (ex: 2 grandes + 1 petite), on met une limite basse par sécurité
-        return 5500
+        # Calcul de la limite (7500 de base - 500 par petite - 800 par grande)
+        limite = 7500 - (500 * p) - (800 * g)
+        
+        # Sécurité : on ne descend jamais en dessous de 5700
+        return max(5700, limite)
 
 
     @property

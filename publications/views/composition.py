@@ -8,7 +8,7 @@ from accounts.decorators import role_required
 from ..models import Publication, Page, Rubrique, PageArticle
 from articles.models import Article
 from .. import services
-from .numeros import numero_semaine_actuelle
+from .liste_numeros import numero_semaine_actuelle
 
 
 @role_required("editeur", "admin")
@@ -168,6 +168,11 @@ def placer_article_page(request, article_id):
         page_id = request.POST.get("page_id")
         article = get_object_or_404(Article, pk=article_id)
         page = get_object_or_404(Page, pk=page_id)
+
+        # NOUVELLE SÉCURITÉ : Page 2 réservée aux éditoriaux
+        if page.numero_page == 2 and article.type_article != "article_editorial":
+            messages.error(request, "La page 2 est réservée exclusivement aux articles de type 'Éditorial'.")
+            return redirect(f"/publications/composition/?numero_id={page.publication.pk}#page-{page.pk}")
         
         # On regarde si l'article a un placement OUVERT dans ce numéro
         placement_ouvert = PageArticle.objects.filter(
