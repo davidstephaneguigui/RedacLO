@@ -169,46 +169,79 @@ def placer_article_page(request, article_id):
         article = get_object_or_404(Article, pk=article_id)
         page = get_object_or_404(Page, pk=page_id)
         
-        if not PageArticle.objects.filter(page=page, article=article).exists():
-            max_pos = PageArticle.objects.filter(page=page).aggregate(Max('position'))['position__max']
-            nouvelle_pos = (max_pos or 0) + 1
-            
-            page_precedente = Page.objects.filter(publication=page.publication, numero_page=page.numero_page - 1).first()
-            signes_pour_cette_page = None
-            
-            if page_precedente:
-                placement_precedent = PageArticle.objects.filter(page=page_precedente, article=article).first()
-                if placement_precedent:
-                    version = article.version_courante()
-                    total_art = version.nombre_signes() if version else 0
-                    
-                    autres_signes = 0
-                    for pa in page_precedente.articles_lies.all():
-                        if pa.article_id != article.id:
-                            if pa.signes_sur_page is not None:
-                                autres_signes += pa.signes_sur_page
-                            elif pa.article.version_courante():
-                                autres_signes += pa.article.version_courante().nombre_signes()
-                    
-                    place_dispo = page_precedente.limite_signes() - autres_signes
-                    signes_sur_page4 = min(max(0, place_dispo), total_art)
-                    signes_pour_cette_page = total_art - signes_sur_page4
-                    
-                    placement_precedent.signes_sur_page = signes_sur_page4
-                    placement_precedent.est_fin = True
-                    placement_precedent.save()
+        # On regarde si l'article a un placement OUVERT dans ce numéro
+        placement_ouvert = PageArticle.objects.filter(
+            article=article, 
+            page__publication=page.publication, 
+            est_fin=False
+        ).first()
 
-            PageArticle.objects.create(
-                page=page, 
-                article=article, 
-                position=nouvelle_pos,
-                est_debut=False,
-                est_fin=True,
-                signes_sur_page=signes_pour_cette_page
-            )
+        # On regarde aussi s'il a un placement FERMÉ
+        placement_ferme = PageArticle.objects.filter(
+            article=article, 
+            page__publication=page.publication, 
+            est_fin=True
+        ).first()
+
+        # --- CAS 1 : C'EST UNE CONTINUATION ---
+        if placement_ouvert:
+            # Règle de parité : pas de débordement depuis une page impaire
+            if placement_ouvert.page.numero_page % 2 != 0:
+                messages.error(request, "Impossible de faire déborder un article d'une page impaire.")
+                return redirect(f"/publications/composition/?numero_id={page.publication.pk}#page-{page.pk}")
+
+            # Règle de la page suivante immédiate
+            if page.numero_page != placement_ouvert.page.numero_page + 1:
+                messages.error(request, f"Un article en cours de débordement doit être placé sur la page {placement_ouvert.page.numero_page + 1}.")
+                return redirect(f"/publications/composition/?numero_id={page.publication.pk}#page-{page.pk}")
+
+            # Calcul des signes
+            total_art = article.version_courante().nombre_signes() if article.version_courante() else 0
+            autres_signes = 0
+            for pa in placement_ouvert.page.articles_lies.all():
+                if pa.article_id != article.id:
+                    if pa.signes_sur_page is not None:
+                        autres_signes += pa.signes_sur_page
+                    elif pa.article.version_courante():
+                        autres_signes += pa.article.version_courante().nombre_signes()
             
-            article.statut_selection = "utilise"
-            article.save()
+            place_dispo = placement_ouvert.page.limite_signes() - autres_signes
+            signes_prec = min(max(0, place_dispo), total_art)
+            
+            # On ferme la page précédente
+            placement_ouvert.signes_sur_page = signes_prec
+            placement_ouvert.est_fin = True
+            placement_ouvert.save()
+            
+            est_un_debut = False
+            signes_cette_page = total_art - signes_prec
+
+        # --- CAS 2 : L'ARTICLE EST DÉJÀ PLACÉ ET FINI ---
+        elif placement_ferme:
+            messages.error(request, f"Cet article est déjà terminé sur la page {placement_ferme.page.numero_page}.")
+            return redirect(f"/publications/composition/?numero_id={page.publication.pk}#page-{page.pk}")
+
+        # --- CAS 3 : NOUVEAU PLACEMENT NORMAL ---
+        else:
+            est_un_debut = True
+            signes_cette_page = None # Prendra toute la place disponible
+
+        # Création du placement sur la nouvelle page
+        max_pos = PageArticle.objects.filter(page=page).aggregate(Max('position'))['position__max']
+        nouvelle_pos = (max_pos or 0) + 1
+        
+        PageArticle.objects.create(
+            page=page, 
+            article=article, 
+            position=nouvelle_pos,
+            est_debut=est_un_debut,
+            est_fin=True, 
+            signes_sur_page=signes_cette_page
+        )
+        
+        article.statut_selection = "utilise"
+        article.save()
+        messages.success(request, f"L'article a été placé sur la page {page.numero_page}.")
             
     return redirect(f"/publications/composition/?numero_id={page.publication.pk}#page-{page.pk}")
 

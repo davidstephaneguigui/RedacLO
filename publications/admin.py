@@ -4,9 +4,9 @@ from .models import Publication, Page, Rubrique, GabaritPage
 
 @admin.register(Publication)
 class PublicationAdmin(admin.ModelAdmin):
-    list_display = ("numero", "volume", "date", "date_creation")
-    list_filter = ("volume",)
-    search_fields = ("numero", "volume")
+    list_display = ("numero", "annee", "date", "date_creation")
+    list_filter = ("statut", "annee")
+    search_fields = ("numero", "annee")
     filter_horizontal = ("articles",)
 
 

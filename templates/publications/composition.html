@@ -301,7 +301,9 @@
                                             <form method="post" action="{% url 'publications:modifier_continuite_article' page.pk article.pk %}" style="margin: 0;">
                                                 {% csrf_token %}
                                                 <input type="hidden" name="champ" value="fin">
-                                                <button type="submit" style="background:none; border:none; cursor:pointer; padding: 0; color: {% if pa.est_fin %}#2e7d32{% else %}#999{% endif %}; font-weight: {% if pa.est_fin %}bold{% else %}normal{% endif %};" title="Cet article se termine-t-il sur cette page ?">
+                                                <button type="submit" style="background:none; border:none; cursor:pointer; padding: 0; color: {% if pa.est_fin %}#2e7d32{% else %}#999{% endif %}; font-weight: {% if pa.est_fin %}bold{% else %}normal{% endif %};" 
+                                                        title="Cet article se termine-t-il sur cette page ?"
+                                                        {% if page.numero_page|divisibleby:2 == False %}disabled title="Un article ne peut pas déborder d'une page impaire."{% endif %}>
                                                     {% if pa.est_fin %}▼ Fin{% else %}▽ Fin{% endif %}
                                                 </button>
                                             </form>
