@@ -101,7 +101,6 @@ def rendre_diff(texte_parent, texte_actuel, couleur):
             else:
                 # Passage identique trop court : absorbé dans la zone.
                 # On le met dans les deux buffers pour qu'il apparaisse
-                # à la fois dans l'ancien (barré) et dans le nouveau.
                 del_buffer.append(escape(txt))
                 ins_buffer.append(escape(txt))
         elif tag == 'delete':

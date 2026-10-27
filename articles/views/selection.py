@@ -68,7 +68,7 @@ def articles_reserves(request):
     
     numero_en_cours = Publication.objects.filter(statut="en_cours").first()
     
-    # NOUVEAU : On récupère les numéros "gelés" (futurs)
+    # On récupère les numéros "gelés" (futurs)
     numeros_futurs = Publication.objects.filter(statut="gele").order_by('numero')
     
     return render(request, "articles/articles_reserves.html", {

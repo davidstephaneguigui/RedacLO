@@ -276,7 +276,7 @@ class ArticleVersion(models.Model):
             article=article,
             numero=prochain_numero,
             contenu=contenu,
-            modifie_par=modifie_par,  # <--- C'est ici qu'on utilise le nouveau nom
+            modifie_par=modifie_par,
             parent=parent,
             type=type,
             commentaire=commentaire
@@ -462,7 +462,6 @@ class Image(models.Model):
     fichier = models.ImageField(upload_to="articles/images/")
     legende = models.CharField(max_length=255, blank=True)
     
-    # NOUVEAU CHAMP
     est_prise_par_redacteur = models.BooleanField(
         default=False, 
         help_text="Est-ce que c'est toi qui as pris cette photo ?"

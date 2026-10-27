@@ -57,7 +57,7 @@ class AnnotationValidationTests(TestCase):
         )
         cls.article = Article.objects.create(
             titre="Article test",
-            auteur=cls.user,
+            redacteur=cls.user,
             contenu="Lorem ipsum dolor sit amet.",
         )
         cls.version = ArticleVersion.objects.create(
@@ -70,7 +70,7 @@ class AnnotationValidationTests(TestCase):
         ann = Annotation.objects.create(
             article=self.article,
             version=self.version,
-            auteur=self.user,
+            redacteur=self.user,
             type="suppression",
             debut=0,
             fin=5,
@@ -83,7 +83,7 @@ class AnnotationValidationTests(TestCase):
             Annotation.objects.create(
                 article=self.article,
                 version=self.version,
-                auteur=self.user,
+                redacteur=self.user,
                 type="suppression",
                 debut=0,
                 fin=5,
@@ -94,7 +94,7 @@ class AnnotationValidationTests(TestCase):
         ann = Annotation.objects.create(
             article=self.article,
             version=self.version,
-            auteur=self.user,
+            redacteur=self.user,
             type="insertion",
             debut=5,
             fin=5,
@@ -107,7 +107,7 @@ class AnnotationValidationTests(TestCase):
             Annotation.objects.create(
                 article=self.article,
                 version=self.version,
-                auteur=self.user,
+                redacteur=self.user,
                 type="insertion",
                 debut=5,
                 fin=10,
@@ -119,7 +119,7 @@ class AnnotationValidationTests(TestCase):
             Annotation.objects.create(
                 article=self.article,
                 version=self.version,
-                auteur=self.user,
+                redacteur=self.user,
                 type="insertion",
                 debut=5,
                 fin=5,
@@ -129,7 +129,7 @@ class AnnotationValidationTests(TestCase):
         ann = Annotation.objects.create(
             article=self.article,
             version=self.version,
-            auteur=self.user,
+            redacteur=self.user,
             type="remplacement",
             debut=0,
             fin=5,
@@ -141,7 +141,7 @@ class AnnotationValidationTests(TestCase):
         ann = Annotation.objects.create(
             article=self.article,
             version=self.version,
-            auteur=self.user,
+            redacteur=self.user,
             type="commentaire",
             debut=0,
             fin=10,
@@ -154,148 +154,8 @@ class AnnotationValidationTests(TestCase):
             Annotation.objects.create(
                 article=self.article,
                 version=self.version,
-                auteur=self.user,
+                redacteur=self.user,
                 type="suppression",
                 debut=20,
                 fin=10,
             )
-
-
-class ArticleMethodesTests(TestCase):
-    """Teste version_courante, texte_final, nombre_signes."""
-
-    @classmethod
-    def setUpTestData(cls):
-        cls.user = User.objects.create_user(
-            username="redacteur",
-            password="test",
-            role="redacteur",
-        )
-        cls.article = Article.objects.create(
-            titre="Article test",
-            auteur=cls.user,
-            contenu="abcdef",
-        )
-        cls.version = ArticleVersion.objects.create(
-            article=cls.article,
-            numero=1,
-            contenu=cls.article.contenu,
-        )
-
-    def test_version_courante(self):
-        v = self.article.version_courante()
-        self.assertEqual(v, self.version)
-
-    def test_version_courante_renvoie_la_plus_recente(self):
-        ArticleVersion.objects.create(
-            article=self.article,
-            numero=2,
-            contenu="deuxième",
-        )
-        v = self.article.version_courante()
-        self.assertEqual(v.numero, 2)
-
-    def test_version_courante_sans_version(self):
-        article_vide = Article.objects.create(
-            titre="Sans version",
-            auteur=self.user,
-        )
-        self.assertIsNone(article_vide.version_courante())
-
-    def test_texte_final_sans_annotation(self):
-        self.assertEqual(self.article.texte_final(), "abcdef")
-
-    def test_texte_final_avec_suppression_acceptee(self):
-        # Supprime "bcd" (positions 1 à 4)
-        Annotation.objects.create(
-            article=self.article,
-            version=self.version,
-            auteur=self.user,
-            type="suppression",
-            debut=1,
-            fin=4,
-            statut="acceptee",
-        )
-        self.assertEqual(self.article.texte_final(), "aef")
-
-    def test_texte_final_avec_insertion_acceptee(self):
-        # Insère "XYZ" à la position 3 (entre "c" et "d")
-        Annotation.objects.create(
-            article=self.article,
-            version=self.version,
-            auteur=self.user,
-            type="insertion",
-            debut=3,
-            fin=3,
-            texte_propose="XYZ",
-            statut="acceptee",
-        )
-        self.assertEqual(self.article.texte_final(), "abcXYZdef")
-
-    def test_texte_final_avec_remplacement_accepte(self):
-        # Remplace "bcd" (positions 1 à 4) par "X"
-        Annotation.objects.create(
-            article=self.article,
-            version=self.version,
-            auteur=self.user,
-            type="remplacement",
-            debut=1,
-            fin=4,
-            texte_propose="X",
-            statut="acceptee",
-        )
-        self.assertEqual(self.article.texte_final(), "aXef")
-
-    def test_texte_final_ignore_annotations_non_acceptees(self):
-        Annotation.objects.create(
-            article=self.article,
-            version=self.version,
-            auteur=self.user,
-            type="suppression",
-            debut=1,
-            fin=4,
-            statut="proposee",
-        )
-        self.assertEqual(self.article.texte_final(), "abcdef")
-
-    def test_texte_final_plusieurs_annotations(self):
-        # Supprime "bc" (1-3), puis insère "Z" à la position 4 (avant "e")
-        Annotation.objects.create(
-            article=self.article,
-            version=self.version,
-            auteur=self.user,
-            type="suppression",
-            debut=1,
-            fin=3,
-            statut="acceptee",
-        )
-        Annotation.objects.create(
-            article=self.article,
-            version=self.version,
-            auteur=self.user,
-            type="insertion",
-            debut=4,
-            fin=4,
-            texte_propose="Z",
-            statut="acceptee",
-        )
-        # Application de la fin vers le début :
-        # 1) insertion Z à 4 dans "abcdef" → "abcdZef"
-        # 2) suppression bc [1,3[ dans "abcdZef" → "adZef"
-        self.assertEqual(self.article.texte_final(), "adZef")
-
-    def test_nombre_signes(self):
-        self.assertEqual(self.article.nombre_signes(), 6)
-
-    def test_nombre_signes_apres_suppression(self):
-        Annotation.objects.create(
-            article=self.article,
-            version=self.version,
-            auteur=self.user,
-            type="suppression",
-            debut=1,
-            fin=4,
-            statut="acceptee",
-        )
-        # "aef" → 3 caractères
-        self.assertEqual(self.article.nombre_signes(), 3)

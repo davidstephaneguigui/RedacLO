@@ -23,7 +23,7 @@ class User(AbstractUser):
     role = models.CharField(max_length=20, choices=ROLES, default="redacteur")
     couleur = models.CharField(max_length=20, choices=COULEURS, default="bleu")
     
-    # Nouveau champ pour la signature par défaut
+    # Champ pour la signature par défaut
     signature_defaut = models.CharField(
         max_length=100, 
         blank=True, 
