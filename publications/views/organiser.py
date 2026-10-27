@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from accounts.decorators import role_required
-from ..models import Publication, Page, GabaritPage
+from ..models import Publication, Page
+from display.models import GabaritPage
 
 @role_required("editeur", "membre_redaction", "admin")
 def organiser_page(request, page_id):

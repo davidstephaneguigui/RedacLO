@@ -1,6 +1,5 @@
 from django.contrib import admin
-from .models import Publication, Page, Rubrique, GabaritPage
-
+from .models import Publication, Page, Rubrique
 
 @admin.register(Publication)
 class PublicationAdmin(admin.ModelAdmin):
@@ -8,7 +7,6 @@ class PublicationAdmin(admin.ModelAdmin):
     list_filter = ("statut", "annee")
     search_fields = ("numero", "annee")
     filter_horizontal = ("articles",)
-
 
 @admin.register(Page)
 class PageAdmin(admin.ModelAdmin):
@@ -19,15 +17,8 @@ class PageAdmin(admin.ModelAdmin):
     # On empêche l'édition des champs calculés comme total_signes
     readonly_fields = ("total_signes", "limite_signes")
 
-
 @admin.register(Rubrique)
 class RubriqueAdmin(admin.ModelAdmin):
     list_display = ("nom", "position", "publication")
     list_filter = ("publication",)
     ordering = ("position",)
-
-
-@admin.register(GabaritPage)
-class GabaritPageAdmin(admin.ModelAdmin):
-    list_display = ("nom",)
-    

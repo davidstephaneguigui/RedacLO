@@ -285,7 +285,7 @@ class ArticleVersion(models.Model):
 
     def est_modifiable_par(self, user):
         """
-        Une version est modifiable par le rédacteur (son auteur), tant qu'elle est
+        Une version est modifiable par le rédacteur, tant qu'elle est
         en brouillon. Une version soumise, validée ou rejetée est figée.
         """
         return (
@@ -306,7 +306,7 @@ class ArticleVersion(models.Model):
         return len(texte)
 
     def peut_etre_supprimee(self, par_user=None):
-        # RÈGLE ABSOLUE : on ne supprime jamais la version initiale de l'auteur
+        # RÈGLE ABSOLUE : on ne supprime jamais la version initiale du rédacteur
         if self.type == "redacteur":
             return False
 

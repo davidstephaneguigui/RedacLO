@@ -131,7 +131,7 @@ class Command(BaseCommand):
                 type_article=type_art,
                 rubrique=rubriques[rubrique_nom],
                 contenu=contenu,
-                auteur=redacteur,
+                redacteur=redacteur,
                 statut=statut
             )
 
@@ -139,9 +139,9 @@ class Command(BaseCommand):
             version_initiale = ArticleVersion.creer(
                 article=article,
                 contenu=article.contenu,
-                auteur=redacteur,
+                redacteur=redacteur,
                 parent=None,
-                type="auteur",
+                type="redacteur",
                 commentaire="Version initiale (test).",
             )
             version_initiale.statut = "brouillon" if statut == "brouillon" else "soumise"
@@ -157,7 +157,7 @@ class Command(BaseCommand):
                 version_relec = ArticleVersion.creer(
                     article=article,
                     contenu=article.contenu + "<p>Note du relecteur : ajout d'une précision.</p>",
-                    auteur=relecteur,
+                    redacteur=relecteur,
                     parent=version_initiale,
                     type="relecture",
                     commentaire="Relecture de test.",

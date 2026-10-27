@@ -6,7 +6,7 @@
     <h2>Assigner un relecteur</h2>
 
     <p>Article : <strong>{{ article.titre }}</strong></p>
-    <p>Auteur : {{ article.auteur.username }}</p>
+    <p>Auteur : {{ article.redacteur.username }}</p>
 
     <form method="post">
         {% csrf_token %}

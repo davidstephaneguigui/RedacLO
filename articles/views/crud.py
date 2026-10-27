@@ -32,7 +32,7 @@ def creer_article(request):
                 contenu=article.contenu,
                 modifie_par=request.user,
                 parent=None,
-                type="auteur",
+                type="redacteur",
                 commentaire="Version initiale.",
             )
             article.version_reference = version
@@ -190,7 +190,7 @@ def soumettre_article(request, pk):
             contenu=article.contenu,
             modifie_par=request.user,
             parent=article.version_reference,
-            type="auteur",
+            type="redacteur",
             commentaire="Version soumise.",
         )
         version.statut = "soumise"
@@ -219,11 +219,11 @@ def annuler_soumission(request, pk):
     
     if article.statut == "soumis":
         version_soumise = article.version_reference
-        if version_soumise and version_soumise.type == "auteur" and version_soumise.statut == "soumise":
+        if version_soumise and version_soumise.type == "redacteur" and version_soumise.statut == "soumise":
             if not version_soumise.enfants.exists():
                 version_soumise.delete()
         
-        v_brouillon = article.versions.filter(type="auteur", statut="brouillon").order_by("-numero").first()
+        v_brouillon = article.versions.filter(type="redacteur", statut="brouillon").order_by("-numero").first()
         if v_brouillon:
             article.version_reference = v_brouillon
         

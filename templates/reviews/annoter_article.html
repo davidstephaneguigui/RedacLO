@@ -10,7 +10,7 @@
     <div style="margin-bottom: 2rem;">
         <h2>{{ article.titre }}</h2>
         <p class="source-texte">
-            <strong>Auteur :</strong> {{ article.auteur.get_signature }} | 
+            <strong>Auteur :</strong> {{ article.redacteur.get_signature }} | 
             <strong>Statut global :</strong> 
             <span class="statut-{{ article.statut }}">{{ article.get_statut_display }}</span>
         </p>

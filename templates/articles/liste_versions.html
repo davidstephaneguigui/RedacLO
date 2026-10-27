@@ -5,7 +5,6 @@
 {% block contenu %}
     <h2>Versions de : {{ article.titre }}</h2>
 
-    <!-- CORRECTION : article.redacteur au lieu de article.auteur -->
     <p><strong>Rédacteur :</strong> {{ article.redacteur.get_signature }}</p>
     <p><strong>Statut de l'article :</strong> 
         {% if article.statut == 'valide_1_fois' %}

@@ -6,7 +6,7 @@
     <h2>Déposer ma relecture</h2>
 
     <p>Article : <strong>{{ review.article.titre }}</strong></p>
-    <p>Auteur : {{ review.article.auteur.username }}</p>
+    <p>Auteur : {{ review.article.redacteur.username }}</p>
 
     <form method="post">
         {% csrf_token %}

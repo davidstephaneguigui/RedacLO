@@ -32,7 +32,7 @@ class AnnotationAdmin(admin.ModelAdmin):
     list_display = (
         "article",
         "version",
-        "redacteur", # <--- Vérifie bien le nom exact dans models.py (auteur ou redacteur)
+        "redacteur",
         "type",
         "debut",
         "fin",

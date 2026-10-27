@@ -41,9 +41,10 @@ INSTALLED_APPS = [
     # Applications du projet RedacLo
     "accounts",
     "articles",
-    "reviews",
-    "publications",
     "core",
+    "display",
+    "publications",
+    "reviews",
 ]
 
 

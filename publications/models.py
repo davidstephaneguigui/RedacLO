@@ -1,18 +1,5 @@
 from django.db import models
 
-
-class GabaritPage(models.Model):
-    nom = models.CharField(max_length=100, verbose_name="Nom du gabarit")
-    description = models.TextField(blank=True, null=True, verbose_name="Description (optionnel)")
-    
-    def __str__(self):
-        return self.nom
-
-    class Meta:
-        verbose_name = "Gabarit de page"
-        verbose_name_plural = "Gabarits de page"
-
-
 class Rubrique(models.Model):
     nom = models.CharField(max_length=100, verbose_name="Nom de la rubrique")
     position = models.PositiveIntegerField(default=0, verbose_name="Position")
@@ -33,7 +20,6 @@ class Rubrique(models.Model):
 
     def __str__(self):
         return self.nom
-
     
 class Publication(models.Model):
     STATUTS = [
@@ -66,7 +52,6 @@ class Publication(models.Model):
     def __str__(self):
         return f"N°{self.numero} ({self.annee}) - ({self.date})"
 
-
 class Page(models.Model):
     publication = models.ForeignKey(Publication, on_delete=models.CASCADE, related_name="pages")
     numero_page = models.PositiveIntegerField()
@@ -78,7 +63,7 @@ class Page(models.Model):
     grandes_illustrations = models.PositiveIntegerField(default=0)
 
     # Lien vers le gabarit
-    gabarit = models.ForeignKey(GabaritPage, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Modèle de page")
+    gabarit = models.ForeignKey('display.GabaritPage', on_delete=models.SET_NULL, null=True, blank=True)
 
     class Meta:
         ordering = ["numero_page"]
@@ -120,7 +105,6 @@ class Page(models.Model):
     def nombre_illustrations(self):
         """Retourne le nombre total d'illustrations sur la page."""
         return self.petites_illustrations + self.grandes_illustrations
-
 
 class PageArticle(models.Model):
     page = models.ForeignKey('Page', on_delete=models.CASCADE, related_name="articles_lies")

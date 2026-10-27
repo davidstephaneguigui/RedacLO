@@ -26,7 +26,7 @@ class Command(BaseCommand):
                 article=article,
                 numero=1,
                 contenu=article.contenu,
-                auteur_modification=article.auteur,
+                modifie_par=article.redacteur,
                 commentaire="Version initiale créée automatiquement.",
             )
 
