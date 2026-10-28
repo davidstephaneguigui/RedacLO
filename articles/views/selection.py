@@ -48,15 +48,29 @@ def articles_reserves(request):
         article_ids = request.POST.getlist("article_ids")
         action = request.POST.get("action", "remettre")
         
-        if article_ids:
-            if action == "ajouter":
-                Article.objects.filter(pk__in=article_ids).update(statut_selection="disponible")
-                messages.success(request, f"{len(article_ids)} article(s) ont été envoyés au vivier de composition.")
-                return redirect("publications:composition")
-            else:
-                Article.objects.filter(pk__in=article_ids).update(statut_selection="a_choisir")
-                messages.success(request, f"{len(article_ids)} article(s) ont été remis dans la liste 'À choisir'.")
-        return redirect("articles:choisir")
+        if action == "ajouter":
+            numero_id = request.POST.get("numero_id")
+            
+            if numero_id:
+                # On récupère le numéro choisi
+                numero_cible = Publication.objects.filter(pk=numero_id).first()
+                if numero_cible:
+                    # S'il était gelé, on le passe en cours (et on gèle l'ancien)
+                    if numero_cible.statut == "gele":
+                        ancien = Publication.objects.filter(statut="en_cours").first()
+                        if ancien:
+                            ancien.statut = "gele"
+                            ancien.save()
+                        numero_cible.statut = "en_cours"
+                        numero_cible.save()
+                        messages.info(request, f"Le numéro n°{numero_cible.numero} est maintenant en cours.")
+                    
+                    # On envoie les articles
+                    Article.objects.filter(pk__in=article_ids).update(statut_selection="disponible")
+                    messages.success(request, f"{len(article_ids)} article(s) ont été envoyés au numéro n°{numero_cible.numero}.")
+                    
+                    # On redirige vers le bon numéro
+                    return redirect(f"/publications/composition/?numero_id={numero_cible.pk}")
 
     articles = Article.objects.filter(
         statut="valide",
@@ -68,14 +82,17 @@ def articles_reserves(request):
     
     numero_en_cours = Publication.objects.filter(statut="en_cours").first()
     
-    # On récupère les numéros "gelés" (futurs)
-    numeros_futurs = Publication.objects.filter(statut="gele").order_by('numero')
+    numeros_disponibles = Publication.objects.filter(statut__in=["en_cours", "gele"]).order_by('numero')
+
+    # On identifie le "prochain" numéro (le plus petit des gelés) pour l'affichage
+    prochain_numero_id = numeros_disponibles.first().pk if numeros_disponibles.exists() else None
     
     return render(request, "articles/articles_reserves.html", {
         'articles': page_obj.object_list,
         'page_obj': page_obj,
         'numero_en_cours': numero_en_cours,
-        'numeros_futurs': numeros_futurs,
+        'numeros_disponibles' : numeros_disponibles,
+        'prochain_numero_id' : prochain_numero_id,
     })
 
 @role_required("editeur", "membre_redaction", "admin")

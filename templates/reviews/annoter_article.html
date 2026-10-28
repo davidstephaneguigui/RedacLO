@@ -27,11 +27,11 @@
                         {% elif v.type == "redacteur" and v.statut == "soumise" %}
                             Version initiale (Envoyée)
                         {% elif v.statut == "validee" %}
-                            Version validée (v{{ v.numero }} par {{ v.auteur_modification.username }})
+                            Version validée (v{{ v.numero }} par {{ v.modifie_par.username }})
                         {% elif v.statut == "rejetee" %}
-                            Version rejetée (v{{ v.numero }} par {{ v.auteur_modification.username }})
+                            Version rejetée (v{{ v.numero }} par {{ v.modifie_par.username }})
                         {% else %}
-                            Version de relecture (v{{ v.numero }} par {{ v.auteur_modification.username }})
+                            Version de relecture (v{{ v.numero }} par {{ v.modifie_par.username|default:"Auteur inconnu" }})
                         {% endif %}
                     </option>
                 {% endfor %}

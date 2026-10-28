@@ -21,23 +21,21 @@
         <!-- Barre d'actions au-dessus du tableau -->
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
             
-            <!-- BLOC DE GAUCHE : Réservation -->
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
-
-                <button type="submit" name="action" value="reserver" class="btn btn-warning">
-                    Réserver pour les numéros suivants
-                </button>
-                <a href="{% url 'articles:articles_reserves' %}" class="btn btn-secondary">
-                    Voir les articles réservés
-                </a>
-            </div>
-
-            <!-- BLOC DE DROITE : Numéro en cours -->
+            <!-- BLOC DE GAUCHE : Les Actions -->
             <div style="display: flex; align-items: center; gap: 0.5rem;">
                 <button type="submit" name="action" value="ajouter" class="btn btn-primary">
-                    Choisir pour le numéro {% if numero_en_cours %}n°{{ numero_en_cours.numero }}{% endif %}
+                    Envoyer au numéro {% if numero_en_cours %}n°{{ numero_en_cours.numero }}{% endif %}
                 </button>
-                
+                <button type="submit" name="action" value="reserver" class="btn btn-secondary">
+                    Réserver pour les numéros suivants
+                </button>
+            </div>
+
+            <!-- BLOC DE DROITE : La Navigation -->
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <a href="{% url 'articles:articles_reserves' %}" class="btn btn-secondary">
+                    📌 Voir les articles réservés
+                </a>
                 <a href="{% url 'publications:composition' %}" class="btn btn-tertiary">
                     Aller vers la composition &rarr;
                 </a>
@@ -80,24 +78,14 @@
                     <td data-label="Action">
                         <div style="display: flex; gap: 0.5rem; justify-content: center; align-items: center;">
                             
-                            <!-- Formulaire Ajouter -->
-                            <form id="form-ajouter-{{ article.pk }}" method="post" action="{% url 'articles:ajouter_au_numero' article.pk %}" style="margin: 0;">
-                                {% csrf_token %}
-                            </form>
-                            
                             <!-- Bouton Ajouter (largeur fixe de 85px) -->
                             <button type="submit" form="form-ajouter-{{ article.pk }}" class="btn btn-sm btn-primary" style="width: 85px; display: flex; justify-content: center; align-items: center;">
                                 Ajouter
                             </button>
-
-                            <!-- Formulaire Annuler -->
-                            <form id="form-annuler-{{ article.pk }}" method="post" action="{% url 'articles:annuler_validation' article.pk %}" style="margin: 0;">
-                                {% csrf_token %}
-                            </form>
-                            
+               
                             <!-- Bouton Annuler (largeur fixe de 85px) -->
                             <button type="submit" form="form-annuler-{{ article.pk }}" class="btn btn-sm btn-secondary" style="width: 85px; display: flex; justify-content: center; align-items: center;">
-                                Annuler
+                                Dévalider
                             </button>
                             
                         </div>
@@ -117,5 +105,15 @@
 </div>
 
 <script src="{% static 'js/selection.js' %}" defer></script>
+
+<!-- Formulaires cachés pour les actions individuelles (hors du tableau) -->
+{% for article in articles %}
+    <form id="form-ajouter-{{ article.pk }}" method="post" action="{% url 'articles:ajouter_au_numero' article.pk %}" style="display: none;">
+        {% csrf_token %}
+    </form>
+    <form id="form-annuler-{{ article.pk }}" method="post" action="{% url 'articles:annuler_validation' article.pk %}" style="display: none;">
+        {% csrf_token %}
+    </form>
+{% endfor %}
 
 {% endblock %}

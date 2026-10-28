@@ -50,7 +50,7 @@ class Publication(models.Model):
 
     @classmethod
     def __str__(self):
-        return f"N°{self.numero} ({self.annee}) - ({self.date})"
+        return f"N°{self.numero} ({self.annee})"
 
 class Page(models.Model):
     publication = models.ForeignKey(Publication, on_delete=models.CASCADE, related_name="pages")

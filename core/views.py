@@ -73,10 +73,10 @@ def marquer_selection(request):
             notifications = Notification.objects.filter(pk__in=notification_ids, destinataire=request.user)
             
             if action == "lu":
-                notifications.update(est_lue=True)
+                notifications.update(lue=True)
                 messages.success(request, "Les notifications sélectionnées ont été marquées comme lues.")
             elif action == "non_lu":
-                notifications.update(est_lue=False)
+                notifications.update(lue=False)
                 messages.success(request, "Les notifications sélectionnées ont été marquées comme non lues.")
             elif action == "supprimer":
                 count = notifications.count()

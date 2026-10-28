@@ -15,6 +15,9 @@
             <form method="post" action="{% url 'publications:creer_numero' %}" style="margin: 0;">
                 {% csrf_token %}
                 <button type="submit" class="btn btn-success">➕ Créer le numéro suivant</button>
+                <a href="{% url 'articles:articles_reserves' %}" class="btn btn-secondary" style="margin-right: 0.5rem;">
+                    📌 Voir les articles réservés
+                </a>
             </form>
         </div>
     </div>

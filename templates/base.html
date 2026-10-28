@@ -14,11 +14,30 @@
                     <a href="{% url 'core:accueil' %}">RedacLo</a>
                 </h1>
                 {% if user.is_authenticated %}
-                    <span class="user-greeting">
-                        Bonjour {{ user.username }} ({{ user.get_role_display }})
-                    </span>
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <a href="{% url 'core:notifications' %}" class="cloche" title="Notifications">
+                            🔔
+                            {% if notifications_non_lues > 0 %}
+                                <span class="cloche-badge">{{ notifications_non_lues }}</span>
+                            {% endif %}
+                        </a>
+                        <span class="user-greeting">
+                            Bonjour {{ user.username }} ({{ user.get_role_display }})
+                        </span>
+                        <!-- Bouton de déconnexion (POST obligatoire depuis Django 5) -->
+                        <form method="post" action="{% url 'logout' %}" style="margin: 0;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-secondary" style="cursor: pointer; padding: 0.2rem 0.5rem; font-size: 0.8rem;">
+                                Déconnexion
+                            </button>
+                        </form>
+                    </div>
+                {% else %}
+                    <div>
+                        <a href="{% url 'login' %}" class="btn btn-sm btn-primary">Connexion</a>
+                    </div>
                 {% endif %}
-            </div>       
+            </div>
 
             <!-- Menu de navigation -->
             <nav class="menu">

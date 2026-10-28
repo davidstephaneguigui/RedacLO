@@ -3,7 +3,7 @@
 venv/
 
 # Base de données
-*.sqlite3
+#*.sqlite3
 
 # Python
 __pycache__/

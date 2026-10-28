@@ -109,13 +109,17 @@
                             <div class="cellule-interne">
                                 {% with versions_relecture=article.versions.all %}
                                     {% for v in versions_relecture %}
-                                        {% if v.type == 'relecture' and v.statut == 'brouillon' %}
-                                            <span style="color: #f57c00; font-weight: 600; font-size: 0.85rem;">✍️ {{ v.modifie_par.username }} (en cours)</span><br>
-                                        {% elif v.type == 'relecture' and v.statut == 'soumise' %}
-                                            <span style="color: #2e7d32; font-weight: 600; font-size: 0.85rem;">✅ {{ v.modifie_par.username }} (déposée)</span><br>
+                                        {% if v.type == 'relecture' %}
+                                            {% if v.statut == 'brouillon' %}
+                                                <span style="color: #f57c00; font-weight: 600; font-size: 0.85rem;">✍️ {{ v.modifie_par.username }} (en cours)</span><br>
+                                            {% elif v.statut == 'soumise' %}
+                                                <span style="color: #2e7d32; font-weight: 600; font-size: 0.85rem;">✅ {{ v.modifie_par.username }} (déposée)</span><br>
+                                            {% elif v.statut == 'validee' %}
+                                                <span style="color: #1565c0; font-weight: 600; font-size: 0.85rem;">⭐ {{ v.modifie_par.username }} (validée)</span><br>
+                                            {% else %}
+                                                <span style="color: #666; font-size: 0.85rem;">{{ v.modifie_par.username }} ({{ v.statut }})</span><br>
+                                            {% endif %}
                                         {% endif %}
-                                    {% empty %}
-                                        <span style="color: #999;">Aucune</span>
                                     {% endfor %}
                                 {% endwith %}
                             </div>
