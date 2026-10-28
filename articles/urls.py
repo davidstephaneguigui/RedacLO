@@ -26,10 +26,5 @@ urlpatterns = [
     path("proposer/", views.soumettre_article_public, name="soumettre_public"),
     path("merci-soumission/", views.merci_soumission, name="merci_soumission"),
     path("<int:pk>/ajouter-image/", views.ajouter_image, name="ajouter_image"),
-    path("choisir/", views.choisir, name="choisir"),
-    path("choisir/ajouter/<int:pk>/", views.ajouter_au_numero, name="ajouter_au_numero"),
-    path("choisir/reserver/<int:pk>/", views.reserver_article, name="reserver_article"),
-    path("choisir/annuler/<int:pk>/", views.annuler_validation, name="annuler_validation"),
-    path("reserves/", views.articles_reserves, name="articles_reserves"),
     path("<int:pk>/annuler-validation-1/", views.annuler_validation_1, name="annuler_validation_1"),
 ]

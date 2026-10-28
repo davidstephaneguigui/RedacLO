@@ -15,7 +15,7 @@
         {% csrf_token %}
         
         <!-- Barre d'actions au-dessus du tableau -->
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+        <div class="barre-actions-mobile" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
             
             <!-- BLOC DE GAUCHE : Les Actions -->
             <div style="display: flex; align-items: center; gap: 0.5rem;">
@@ -46,7 +46,7 @@
                 <a href="{% url 'publications:numeros' %}" class="btn btn-secondary">
                     📋 Tableau des numéros
                 </a>
-                <a href="{% url 'articles:choisir' %}" class="btn btn-secondary">
+                <a href="{% url 'publications:choisir' %}" class="btn btn-secondary">
                     &larr; Retour à la sélection
                 </a>
                 <a href="{% url 'publications:composition' %}" class="btn btn-tertiary">
@@ -55,7 +55,7 @@
             </div>
         </div>
 
-        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+        <table class="table-responsive-cards" style="width: 100%; border-collapse: collapse; text-align: left;">
             <thead style="background-color: #f4f6f8; border-bottom: 2px solid #e0e0e0;">
                 <tr>
                     <th style="width: 5%; padding: 1rem; text-align: center;">
@@ -72,15 +72,15 @@
                     <td style="padding: 1rem; text-align: center;">
                         <input type="checkbox" name="article_ids" value="{{ article.pk }}" style="transform: scale(1.5);">
                     </td>
-                    <td style="padding: 1rem;">
+                    <td data-label="Titre" style="padding: 1rem;">
                         <a href="{% url 'articles:detail_article' article.pk %}" style="color: #0056b3; text-decoration: none; font-weight: 500;">
                             {{ article.titre }}
                         </a>
                     </td>
-                    <td style="padding: 1rem; line-height: 1.2;">
+                    <td data-label="Rédacteur" style="padding: 1rem; line-height: 1.2;">
                         <strong>{{ article.redacteur.get_signature }}</strong>
                     </td>
-                    <td style="padding: 1rem;">{{ article.date_modification|date:"d/m/Y" }}</td>
+                    <td data-label="Date" style="padding: 1rem;">{{ article.date_modification|date:"d/m/Y" }}</td>
                 </tr>
                 {% empty %}
                 <tr>

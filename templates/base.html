@@ -5,6 +5,7 @@
         <meta charset="UTF-8">
         <title>{% block titre %}RedacLo{% endblock %}</title>
         <link rel="stylesheet" href="{% static 'css/main.css' %}">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
     </head>
     <body>
         <header>
@@ -14,17 +15,11 @@
                     <a href="{% url 'core:accueil' %}">RedacLo</a>
                 </h1>
                 {% if user.is_authenticated %}
-                    <div style="display: flex; align-items: center; gap: 1rem;">
-                        <a href="{% url 'core:notifications' %}" class="cloche" title="Notifications">
-                            🔔
-                            {% if notifications_non_lues > 0 %}
-                                <span class="cloche-badge">{{ notifications_non_lues }}</span>
-                            {% endif %}
-                        </a>
+                    <div class="user-info-container">
                         <span class="user-greeting">
-                            Bonjour {{ user.username }} ({{ user.get_role_display }})
+                            Bonjour {{ user.username }} <span class="user-role">({{ user.get_role_display }})</span>
                         </span>
-                        <!-- Bouton de déconnexion (POST obligatoire depuis Django 5) -->
+                        
                         <form method="post" action="{% url 'logout' %}" style="margin: 0;">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-sm btn-secondary" style="cursor: pointer; padding: 0.2rem 0.5rem; font-size: 0.8rem;">
@@ -40,17 +35,23 @@
             </div>
 
             <!-- Menu de navigation -->
-            <nav class="menu">
-                <a href="{% url 'core:accueil' %}" class="btn btn-ghost {% if request.resolver_match.url_name == 'accueil' %}active{% endif %}">Accueil</a>
-                <a href="{% url 'articles:mes_articles' %}" class="btn btn-ghost {% if request.resolver_match.url_name == 'mes_articles' or request.resolver_match.url_name == 'detail_article' or request.resolver_match.url_name == 'creer_article' or request.resolver_match.url_name == 'modifier_article' %}active{% endif %}">Articles</a>
+            <nav class="main-nav">
+                <!-- Le bouton burger (visible uniquement sur mobile) -->
+                <button class="menu-burger" id="burger-btn">☰</button>
                 
-                {% if user.role == "editeur" or user.role == "membre_redaction" or user.role == "admin" %}
-                    <a href="{% url 'reviews:a_relire' %}" class="btn btn-ghost {% if request.resolver_match.url_name == 'a_relire' or request.resolver_match.url_name == 'liste_versions' or request.resolver_match.url_name == 'annoter_article' or request.resolver_match.url_name == 'annoter_article_avec_version' %}active{% endif %}">Relire</a>
-                    <a href="{% url 'articles:choisir' %}" class="btn btn-ghost {% if request.resolver_match.url_name == 'choisir' %}active{% endif %}">Choisir</a>
-                    <a href="{% url 'articles:articles_reserves' %}" class="btn btn-ghost {% if request.resolver_match.url_name == 'articles_reserves' %}active{% endif %}">Réserver</a>
-                    <a href="{% url 'publications:composition' %}" class="btn btn-ghost {% if request.resolver_match.url_name == 'composition' %}active{% endif %}">Composer</a>
-                    <a href="{% url 'publications:organiser_index' %}" class="btn btn-ghost {% if request.resolver_match.url_name == 'organiser_index' or request.resolver_match.url_name == 'organiser_page' %}active{% endif %}">Organiser</a>
-                {% endif %}
+                <!-- Les liens (qui se transformeront en menu déroulant sur mobile) -->
+                <div class="nav-left" id="nav-links">
+                    <a href="{% url 'core:accueil' %}" class="btn btn-ghost {% if request.resolver_match.url_name == 'accueil' %}active{% endif %}">Accueil</a>
+                    <a href="{% url 'articles:mes_articles' %}" class="btn btn-ghost {% if request.resolver_match.url_name == 'mes_articles' %}active{% endif %}">Articles</a>
+                    
+                    {% if user.role == "editeur" or user.role == "membre_redaction" or user.role == "admin" %}
+                        <a href="{% url 'reviews:a_relire' %}" class="btn btn-ghost {% if request.resolver_match.url_name == 'a_relire' %}active{% endif %}">Relire</a>
+                        <a href="{% url 'publications:choisir' %}" class="btn btn-ghost {% if request.resolver_match.url_name == 'choisir' %}active{% endif %}">Choisir</a>
+                        <a href="{% url 'publications:articles_reserves' %}" class="btn btn-ghost {% if request.resolver_match.url_name == 'articles_reserves' %}active{% endif %}">Réserver</a>
+                        <a href="{% url 'publications:composition' %}" class="btn btn-ghost {% if request.resolver_match.url_name == 'composition' %}active{% endif %}">Composer</a>
+                        <a href="{% url 'publications:organiser_index' %}" class="btn btn-ghost {% if request.resolver_match.url_name == 'organiser_index' %}active{% endif %}">Organiser</a>
+                    {% endif %}
+                </div>
             </nav>
 
         <!-- Affichage des messages d'erreur et de succès -->
@@ -96,7 +97,7 @@
                 if (burgerBtn && navLinks) {
                     // 1. Clic sur le bouton : on ouvre/ferme le menu
                     burgerBtn.addEventListener("click", function(event) {
-                        event.stopPropagation(); 
+                        event.stopPropagation();
                         navLinks.classList.toggle("active");
                     });
 

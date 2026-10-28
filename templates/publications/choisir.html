@@ -19,7 +19,7 @@
         {% csrf_token %}
         
         <!-- Barre d'actions au-dessus du tableau -->
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+        <div class="barre-actions-mobile" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
             
             <!-- BLOC DE GAUCHE : Les Actions -->
             <div style="display: flex; align-items: center; gap: 0.5rem;">
@@ -33,7 +33,7 @@
 
             <!-- BLOC DE DROITE : La Navigation -->
             <div style="display: flex; align-items: center; gap: 0.5rem;">
-                <a href="{% url 'articles:articles_reserves' %}" class="btn btn-secondary">
+                <a href="{% url 'publications:articles_reserves' %}" class="btn btn-secondary">
                     📌 Voir les articles réservés
                 </a>
                 <a href="{% url 'publications:composition' %}" class="btn btn-tertiary">
@@ -42,7 +42,7 @@
             </div>
         </div>
 
-        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+        <table class="table-responsive-cards" style="width: 100%; border-collapse: collapse; text-align: left;">
             <thead style="background-color: #f4f6f8; border-bottom: 2px solid #e0e0e0;">
                 <tr>
                     <th style="width: 5%; padding: 1rem; text-align: center;">
@@ -62,39 +62,50 @@
                     <td style="padding: 1rem; text-align: center;">
                         <input type="checkbox" name="article_ids" value="{{ article.pk }}" style="transform: scale(1.5);">
                     </td>
-                    <td style="padding: 1rem;">
+                    <td data-label="Titre" style="padding: 1rem;">
                         <a href="{% url 'articles:detail_article' article.pk %}" style="color: #0056b3; text-decoration: none; font-weight: 500;">
                             {{ article.titre }}
                         </a>
                     </td>
-                    <td style="padding: 1rem;">{{ article.get_type_article_display|default:article.type_article }}</td>
-                    <td style="padding: 1rem; line-height: 1.2;">
-                        <strong>{{ article.redacteur.get_signature }}</strong>
+                    <td data-label="Type" style="padding: 1rem;">
+                        {{ article.get_type_article_display }}
                     </td>
-                    <td style="padding: 1rem; font-weight: bold; color: #555;">
+                    <td data-label="Rédacteur" style="padding: 1rem; line-height: 1.2;">
+                        <strong>{{ article.redacteur.get_signature }}</strong>
+                        <br>
+                        <small style="color: #666;">{{ article.redacteur.email }}</small>
+                    </td>
+                    <td data-label="Signes" style="padding: 1rem;">
                         {{ article.version_courante.nombre_signes|default:0 }}
                     </td>
-                    <td style="padding: 1rem;">{{ article.date_modification|date:"d/m/Y" }}</td>
-                    <td data-label="Action">
+                    <td data-label="Date" style="padding: 1rem;">
+                        {{ article.date_modification|date:"d/m/Y" }}
+                    </td>
+                    <td data-label="Action" style="padding: 1rem;">
+                        <!-- Tes boutons d'action -->
                         <div style="display: flex; gap: 0.5rem; justify-content: center; align-items: center;">
-                            
-                            <!-- Bouton Ajouter (largeur fixe de 85px) -->
+                            <!-- Bouton Ajouter -->
+                            <form id="form-ajouter-{{ article.pk }}" method="post" action="{% url 'publications:ajouter_au_numero' article.pk %}" style="margin: 0;">
+                                {% csrf_token %}
+                            </form>
                             <button type="submit" form="form-ajouter-{{ article.pk }}" class="btn btn-sm btn-primary" style="width: 85px; display: flex; justify-content: center; align-items: center;">
                                 Ajouter
                             </button>
-               
-                            <!-- Bouton Annuler (largeur fixe de 85px) -->
+
+                            <!-- Bouton Annuler -->
+                            <form id="form-annuler-{{ article.pk }}" method="post" action="{% url 'publications:annuler_validation' article.pk %}" style="margin: 0;">
+                                {% csrf_token %}
+                            </form>
                             <button type="submit" form="form-annuler-{{ article.pk }}" class="btn btn-sm btn-secondary" style="width: 85px; display: flex; justify-content: center; align-items: center;">
-                                Dévalider
+                                Annuler
                             </button>
-                            
                         </div>
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="6" style="text-align: center; padding: 2rem; color: #888;">
-                        Aucun article validé en attente de sélection.
+                    <td colspan="7" style="text-align: center; padding: 2rem; color: #888;">
+                        Aucun article validé n'est en attente de sélection.
                     </td>
                 </tr>
                 {% endfor %}
@@ -108,10 +119,10 @@
 
 <!-- Formulaires cachés pour les actions individuelles (hors du tableau) -->
 {% for article in articles %}
-    <form id="form-ajouter-{{ article.pk }}" method="post" action="{% url 'articles:ajouter_au_numero' article.pk %}" style="display: none;">
+    <form id="form-ajouter-{{ article.pk }}" method="post" action="{% url 'publications:ajouter_au_numero' article.pk %}" style="display: none;">
         {% csrf_token %}
     </form>
-    <form id="form-annuler-{{ article.pk }}" method="post" action="{% url 'articles:annuler_validation' article.pk %}" style="display: none;">
+    <form id="form-annuler-{{ article.pk }}" method="post" action="{% url 'publications:annuler_validation' article.pk %}" style="display: none;">
         {% csrf_token %}
     </form>
 {% endfor %}

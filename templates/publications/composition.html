@@ -10,56 +10,55 @@
     <div style="margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid #e0e0e0;">
         
         <!-- Ligne du haut : Titre à gauche, Bouton Archives à droite -->
-        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
             <div>
                 <h2 style="margin: 0 0 0.5rem 0; font-size: 1.5rem; color: #333;">Chemin de fer : n° {{ numero.numero }}</h2>
                 <p style="font-style: italic; color: #666; margin: 0;">
                     Semaine n°{{ numero_semaine }}, {{ dates_semaine }}
                 </p>
             </div>
-
-            <!-- Boutons Nouveau numéro & Archives -->
-            <div style="display: flex; gap: 0.5rem;">
-                <!-- Bouton Nouveau Numéro -->
+            <div>
                 <a href="{% url 'publications:numeros' %}" class="btn btn-secondary" style="font-weight: bold;">
                     📋 Tableau des numéros
                 </a>
             </div>
         </div>
 
-        <!-- Ligne du bas : Boutons d'action -->
-        <div style="margin-top: 1rem; display: flex; justify-content: flex-start; align-items: center; gap: 1rem;">
-            <a href="{% url 'articles:choisir' %}" class="btn btn-secondary">&larr; Retour aux articles à choisir</a>
+        <!-- Ligne du bas : Boutons d'action + Compteurs -->
+        <div class="barre-actions-mobile" style="margin-top: 1rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
             
-            <button type="button" class="btn btn-primary" id="btn-toggle-vivier" onclick="toggleVivier()">
-                {% if articles %}Masquer le vivier{% else %}Afficher le vivier{% endif %}
-            </button>
+            <!-- Sous-conteneur des boutons d'action (à gauche) -->
+            <div style="display: flex; justify-content: flex-start; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                <a href="{% url 'publications:choisir' %}" class="btn btn-secondary">&larr; Retour aux articles à choisir</a>
+                
+                <button type="button" class="btn btn-primary" id="btn-toggle-vivier" onclick="toggleVivier()">
+                    {% if articles %}Masquer le vivier{% else %}Afficher le vivier{% endif %}
+                </button>
 
-            {% if numero.numero == num_semaine %}
-                {% if numero.statut == 'en_cours' %}
-                    <form method="post" action="{% url 'publications:cloturer_numero' %}" style="margin: 0;">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-danger"
-                                onclick="return confirm('Clôturer définitivement ce numéro ?');">
-                            Clôturer ce numéro
-                        </button>
-                    </form>
-                {% elif numero.statut == 'publie' %}
-                    <form method="post" action="{% url 'publications:decloturer_numero' numero.pk %}" style="margin: 0;">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-warning"
-                                onclick="return confirm('Rouvrir ce numéro pour le modifier ?');">
-                            ↩ Dé-clôturer ce numéro
-                        </button>
-                    </form>
-                {% endif %}
-            {% endif %}
+                <form method="post" action="{% url 'publications:cloturer_numero' %}" style="margin: 0;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger" onclick="return confirm('Voulez-vous vraiment clôturer ce numéro ?');">
+                        Clôturer le numéro
+                    </button>
+                </form>
+            </div>
 
-            {% if lecture_seule %}
-                <div style="background: #fff3cd; border: 1px solid #ffc107; padding: 0.8rem; border-radius: 6px; margin-bottom: 1rem; color: #856404;">
-                    ⚠️ Ce numéro (n° {{ numero.numero }}) est clôturé. Il est en lecture seule.
+            <!-- Sous-conteneur des compteurs (à droite) -->
+            <div class="compteurs-mobile" style="display: flex; gap: 0.5rem;">
+                <div style="background: #fff3cd; padding: 0.4rem 1rem; border-radius: 8px; border: 1px solid #ffeeba; text-align: center;">
+                    <span style="display: block; font-size: 0.7rem; color: #856404; text-transform: uppercase;">Dans le vivier</span>
+                    <strong style="font-size: 1rem; color: #856404;">{{ signes_vivier }} signes</strong>
                 </div>
-            {% endif %}
+                <div style="background: #e3f2fd; padding: 0.4rem 1rem; border-radius: 8px; border: 1px solid #90caf9; text-align: center;">
+                    <span style="display: block; font-size: 0.7rem; color: #1565c0; text-transform: uppercase;">Placés sur les pages</span>
+                    <strong style="font-size: 1rem; color: #1565c0;">{{ signes_places }} / {{ capacite_totale }}</strong>
+                </div>
+                <div style="background: #e8f5e9; padding: 0.4rem 1rem; border-radius: 8px; border: 1px solid #a5d6a7; text-align: center;">
+                    <span style="display: block; font-size: 0.7rem; color: #2e7d32; text-transform: uppercase;">Reste à placer</span>
+                    <strong style="font-size: 1rem; color: #2e7d32;">{{ signes_restants }} signes</strong>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -68,40 +67,21 @@
         {% csrf_token %}
     </form>
 
-    <!-- 2. LA BARRE D'ACTIONS ET COMPTEURS SUR UNE SEULE LIGNE -->
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; background: #f8f9fa; padding: 1rem; border-radius: 8px; border: 1px solid #e0e0e0;">
+    <!-- BARRE D'ACTIONS DU VIVIER -->
+    <div id="actions-vivier" style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 2rem; background: #f8f9fa; padding: 1rem; border-radius: 8px; border: 1px solid #e0e0e0;">
         
-        <!-- Boutons d'action à gauche -->
-        <div id="actions-vivier" style="display: flex; gap: 0.5rem; align-items: center;">
-            <!-- LA CASE TOUT SÉLECTIONNER -->
-            <label style="display: flex; align-items: center; gap: 0.5rem; margin-right: 1rem; cursor: pointer; font-weight: bold;">
-                <input type="checkbox" id="select-all-composer" style="transform: scale(1.3);">
-                Tout sélectionner
-            </label>
+        <label style="display: flex; align-items: center; gap: 0.5rem; margin-right: 1rem; cursor: pointer; font-weight: bold;">
+            <input type="checkbox" id="select-all-composer" style="transform: scale(1.3);">
+            Tout sélectionner
+        </label>
 
-            <button type="submit" form="form-selection" name="action" value="renvoyer" class="btn btn-warning" onclick="return confirm('Renvoyer les articles sélectionnés vers la page Choisir ?');">
-                &larr; Renvoyer vers Choisir
-            </button>
-            <button type="submit" form="form-selection" name="action" value="reserver" class="btn btn-secondary" onclick="return confirm('Réserver les articles sélectionnés pour les numéros suivants ?');">
-                📌 Réserver
-            </button>
-        </div>
-
-        <!-- Compteurs à droite -->
-        <div style="display: flex; gap: 1rem; margin-left:auto">
-            <div style="background: #fff3cd; padding: 0.4rem 1rem; border-radius: 8px; border: 1px solid #ffeeba; text-align: center;">
-                <span style="display: block; font-size: 0.7rem; color: #856404; text-transform: uppercase;">Dans le vivier</span>
-                <strong style="font-size: 1rem; color: #856404;">{{ signes_vivier }} signes</strong>
-            </div>
-            <div style="background: #e3f2fd; padding: 0.4rem 1rem; border-radius: 8px; border: 1px solid #90caf9; text-align: center;">
-                <span style="display: block; font-size: 0.7rem; color: #1565c0; text-transform: uppercase;">Placés sur les pages</span>
-                <strong style="font-size: 1rem; color: #1565c0;">{{ signes_places }} / {{ capacite_totale }}</strong>
-            </div>
-            <div style="background: #e8f5e9; padding: 0.4rem 1rem; border-radius: 8px; border: 1px solid #a5d6a7; text-align: center;">
-                <span style="display: block; font-size: 0.7rem; color: #2e7d32; text-transform: uppercase;">Reste à placer</span>
-                <strong style="font-size: 1rem; color: #2e7d32;">{{ signes_restants }} signes</strong>
-            </div>
-        </div>
+        <button type="submit" form="form-selection" name="action" value="renvoyer" class="btn btn-warning" onclick="return confirm('Renvoyer les articles sélectionnés vers la page Choisir ?');">
+            &larr; Renvoyer vers Choisir
+        </button>
+        
+        <button type="submit" form="form-selection" name="action" value="reserver" class="btn btn-secondary" onclick="return confirm('Réserver les articles sélectionnés pour les numéros suivants ?');">
+            📌 Réserver
+        </button>
     </div>
 
     <!-- 3. LE FORMULAIRE GLOBAL (englobe le vivier et la maquette) -->

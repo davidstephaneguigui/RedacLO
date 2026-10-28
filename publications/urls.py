@@ -24,4 +24,10 @@ urlpatterns = [
     path("reprendre/<int:pk>/", views.reprendre_numero, name="reprendre_numero"),
     path("numeros/", views.liste_numeros, name="numeros"),
     path("archives/", views.archives_numeros, name="archives_numeros"),
+    # Nouvelles routes pour la sélection
+    path("choisir/", views.choisir, name="choisir"),
+    path("reserves/", views.articles_reserves, name="articles_reserves"),
+    path("<int:pk>/ajouter/", views.ajouter_au_numero, name="ajouter_au_numero"),
+    path("<int:pk>/reserver/", views.reserver_article, name="reserver_article"),
+    path("<int:pk>/annuler-validation/", views.annuler_validation, name="annuler_validation"),
 ]

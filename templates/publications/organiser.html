@@ -11,6 +11,8 @@
         <em>(Cette fonctionnalité sera reliée plus tard au secrétariat de rédaction pour la génération finale).</em>
     </p>
 
+
+
     <form method="post" style="display: flex; flex-direction: column; gap: 1.5rem;">
         {% csrf_token %}
         
@@ -28,8 +30,15 @@
 
         <div style="display: flex; gap: 1rem; margin-top: 1rem;">
             <button type="submit" class="btn btn-primary">Enregistrer le modèle</button>
+                <a href="{% url 'display:export_idml' page.pk %}" class="btn btn-success" style="background-color: #2e7d32; border-color: #2e7d32; color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; display: inline-block;">
+                    ⬇️ Télécharger le fichier InDesign (.idml)</a>
             <a href="{% url 'publications:organiser_index' %}" class="btn btn-secondary">&larr; Retour à l'organisation</a>
         </div>
     </form>
 </div>
+
+
+
+
+
 {% endblock %}

@@ -1,30 +1,216 @@
-@media (max-width: 900px) {
-    .menu-burger { display: block; }
-    .nav-left { display: none; position: absolute; top: 100%; left: 0; width: 100%; flex-direction: column; align-items: flex-start; background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--radius); padding: 1rem; margin-top: 0.5rem; z-index: 100; box-shadow: var(--shadow-md); }
-    .nav-left.active { display: flex; }
-    .main-nav { position: relative; flex-wrap: wrap; align-items: flex-start; }
-    .btn-desktop-only { display: none !important; }
-    .comparaison { grid-template-columns: 1fr; }
-    .layout-composition { flex-direction: column; }
-    .vivier { position: static; flex: none; width: 100%; max-height: none; margin-bottom: 1.5rem; }
-    .grille-pages { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
-    
-    .table-responsive-cards { display: block; width: 100%; }
-    .table-responsive-cards thead { display: none; }
-    .table-responsive-cards tbody, .table-responsive-cards tr, .table-responsive-cards td { display: block; width: 100%; }
-    .table-responsive-cards tr { margin-bottom: 1.5rem; border: 1px solid var(--c-border); border-radius: var(--radius); background: var(--c-surface); box-shadow: var(--shadow-sm); padding: 1rem; }
-    .table-responsive-cards td { display: flex; justify-content: space-between; align-items: center; text-align: right; padding: 0.8rem 0; border-bottom: 1px solid var(--c-surface-alt); height: auto; }
-    .table-responsive-cards td:last-child { border-bottom: none; padding-bottom: 0; }
-    .table-responsive-cards td::before { content: attr(data-label); display: inline-block; font-weight: bold; color: var(--c-text-muted); font-size: 0.85rem; text-transform: uppercase; margin-right: 1rem; flex-shrink: 0; }
-    .table-responsive-cards .cellule-interne { display: block; height: auto; text-align: right; flex-grow: 1; }
-    .table-responsive-cards td[data-label="Titre"] { display: block; text-align: left; min-height: 6rem; padding-top: 0.2rem; padding-bottom: 1rem; }
-    .table-responsive-cards td[data-label="Titre"]::before { display: block; margin-bottom: 0.3rem; }
-    .table-responsive-cards td[data-label="Titre"] .cellule-interne { text-align: left; }
-    .table-responsive-cards td[data-label="Titre"] .texte-tronque { display: block; -webkit-line-clamp: unset; line-clamp: unset; overflow: visible; }
-    .champ-fichier { flex-direction: column; align-items: flex-start !important; gap: 0.2rem !important; }
-}
-
 @media (max-width: 600px) {
     .pagination { flex-direction: column; align-items: stretch; }
     .pagination-links { justify-content: center; flex-wrap: wrap; }
+}
+
+ /* ============================================================
+   RESPONSIVE (Tablettes et Mobiles)
+   ============================================================ */
+@media (max-width: 900px) {
+    /* --- MENU BURGER ET EN-TÊTE --- */
+    .menu-burger { display: block !important; }
+    
+    .nav-left {
+        display: none !important; 
+        position: absolute; 
+        top: 100%; 
+        left: 0; 
+        width: 100%; 
+        flex-direction: column; 
+        align-items: flex-start;
+        background: #fff; 
+        border: 1px solid #e0e0e0; 
+        border-radius: 6px; 
+        padding: 1rem; 
+        margin-top: 0.5rem; 
+        z-index: 100; 
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .nav-left.active { 
+        display: flex !important; 
+    }
+
+    /* --- EN-TÊTE UTILISATEUR (Empilé et sans le rôle) --- */
+    .user-info-container {
+        display: flex;
+        flex-direction: column !important;
+        align-items: flex-end;
+        gap: 0.5rem;
+    }
+    
+    .user-role {
+        display: none !important; /* On cache le rôle (Administrateur) sur mobile */
+    }
+
+
+
+    /* --- 1. MENU ET HEADER (déjà géré plus haut, on s'assure que c'est bon) --- */
+    .main-nav { position: relative; flex-wrap: wrap; align-items: flex-start; }
+    .btn-desktop-only { display: none !important; }
+
+    /* --- 2. BARRES D'ACTIONS (Choisir, Réserver, Composer) --- */
+    .barre-actions-mobile {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        width: 100% !important;
+    }
+    
+    .barre-actions-mobile > div {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        width: 100% !important;
+        gap: 0.5rem !important;
+    }
+
+    .barre-actions-mobile .btn, 
+    .barre-actions-mobile button,
+    .barre-actions-mobile select {
+        width: 100% !important;
+        margin-bottom: 0.5rem !important;
+        white-space: normal !important;
+    }
+
+    /* --- 3. COMPTEURS DE LA COMPOSITION --- */
+    .compteurs-mobile {
+        flex-wrap: wrap !important;
+        width: 100% !important;
+        justify-content: space-between !important;
+        margin-left: 0 !important;
+    }
+    .compteurs-mobile > div {
+        flex: 1 1 30% !important;
+        min-width: 100px;
+        box-sizing: border-box;
+    }
+
+    /* --- 4. TABLEAUX EN CARTES (Choisir, Réserver) --- */
+    .table-responsive-cards { display: block !important; width: 100% !important; border: none !important; }
+    .table-responsive-cards thead { display: none !important; }
+    .table-responsive-cards tbody, .table-responsive-cards tr { display: block !important; width: 100% !important; }
+    
+    .table-responsive-cards tr {
+        position: relative;
+        margin-bottom: 1.5rem;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        background: #fff;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        padding: 1rem;
+        padding-top: 3rem;
+        box-sizing: border-box;
+    }
+    
+    .table-responsive-cards td {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        text-align: left !important;
+        padding: 0.6rem 0;
+        border-bottom: 1px solid #f0f0f0;
+        width: 100%;
+        box-sizing: border-box;
+        gap: 0.2rem;
+    }
+    
+    .table-responsive-cards td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #888;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        margin-bottom: 0;
+    }
+    
+    .table-responsive-cards td * { word-break: normal; overflow-wrap: break-word; }
+    .table-responsive-cards td small { word-break: break-all; }
+
+    .table-responsive-cards td:first-child {
+        position: absolute !important;
+        top: 1rem !important;
+        right: 1rem !important;
+        width: auto !important;
+        padding: 0 !important;
+        border: none !important;
+        display: block !important;
+    }
+    .table-responsive-cards td:first-child::before { display: none !important; }
+
+    .table-responsive-cards td[data-label="Titre"] {
+        display: block !important;
+        text-align: left;
+        border-bottom: 2px solid #e0e0e0;
+        padding: 0 3rem 0.8rem 0 !important; 
+        margin-bottom: 0.5rem;
+        font-size: 1.1rem;
+    }
+    .table-responsive-cards td[data-label="Titre"]::before { display: none !important; }
+
+    .table-responsive-cards td[data-label="Action"] {
+        display: flex !important;
+        flex-direction: column;
+        border-bottom: none !important;
+        padding-top: 1rem !important;
+    }
+    .table-responsive-cards td[data-label="Action"]::before { display: none !important; }
+    .table-responsive-cards td[data-label="Action"] > div {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        width: 100%;
+    }
+    .table-responsive-cards td[data-label="Action"] .btn,
+    .table-responsive-cards td[data-label="Action"] button {
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0.5rem !important;
+    }
+
+    .table-responsive-cards td[colspan] {
+        display: block !important;
+        text-align: center !important;
+        padding: 2rem 1rem !important;
+        border: none !important;
+    }
+    .table-responsive-cards td[colspan]::before { display: none !important; }
+
+    /* --- 5. LE CHEMIN DE FER ET LE VIVIER --- */
+    .layout-composition {
+        flex-direction: column !important;
+    }
+    .vivier {
+        width: 100% !important;
+        position: static !important;
+        max-height: none !important;
+        margin-bottom: 1.5rem;
+    }
+    .chemin-de-fer {
+        width: 100% !important;
+    }
+    .grille-pages {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Forcer les formulaires de la barre d'actions à prendre toute la largeur */
+    .barre-actions-mobile form {
+        width: 100% !important;
+    }
+    .barre-actions-mobile form button {
+        width: 100% !important;
+    }
+
+    /* Barre d'actions du vivier (Tout sélectionner, Renvoyer, Réserver) */
+    #actions-vivier {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        width: 100% !important;
+    }
+    
+    #actions-vivier label,
+    #actions-vivier button,
+    #actions-vivier .btn {
+        width: 100% !important;
+        margin-bottom: 0.5rem !important;
+        text-align: center !important;
+    }
 }
