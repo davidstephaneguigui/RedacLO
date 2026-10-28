@@ -67,3 +67,7 @@ Le projet est divisé en plusieurs applications, chacune ayant une responsabilit
 5.  **Lancer le serveur de développement**
     ```bash
     python manage.py runserver
+
+6. **Acceder au site** :
+    ```bash
+    Ouvrez votre navigateur et rendez-vous sur http://127.0.0.1:8000/.
