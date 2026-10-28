@@ -474,5 +474,24 @@ class Image(models.Model):
     taille = models.CharField(max_length=10, choices=TAILLES, default="petite")
     date_creation = models.DateTimeField(auto_now_add=True)
 
+    AVIS_CHOICES = [
+        ("en_attente", "En attente d'avis"),
+        ("favorable", "Favorable"),
+        ("defavorable", "Défavorable"),
+        ("a_remplacer", "À remplacer"),
+    ]
+    
+    avis_editeur = models.CharField(
+        max_length=20, 
+        choices=AVIS_CHOICES, 
+        default="en_attente",
+        verbose_name="Avis de l'éditeur"
+    )
+    
+    commentaire_editeur = models.TextField(
+        blank=True, 
+        verbose_name="Commentaire sur l'image"
+    )
+
     def __str__(self):
         return f"Image pour {self.article.titre} ({self.taille})"

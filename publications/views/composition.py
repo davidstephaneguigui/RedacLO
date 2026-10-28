@@ -9,7 +9,7 @@ from ..models import Publication, Page, Rubrique, PageArticle
 from articles.models import Article
 from .. import services
 from .liste_numeros import numero_semaine_actuelle
-
+from articles.models import Image
 
 @role_required("editeur", "admin")
 def composition_numero(request):
@@ -137,7 +137,6 @@ def composition_numero(request):
         "num_semaine": num_semaine,
     })
 
-
 @role_required("editeur", "membre_redaction")
 def utiliser_article(request, pk):
     if request.method == "POST":
@@ -151,7 +150,6 @@ def utiliser_article(request, pk):
             messages.error(request, "Aucun numéro en cours n'a été trouvé.")
     return redirect("publications:composition")
 
-
 @role_required("editeur", "membre_redaction")
 def reserver_article(request, pk):
     if request.method == "POST":
@@ -160,7 +158,6 @@ def reserver_article(request, pk):
         article.save()
         messages.success(request, f"L'article « {article.titre} » a été réservé.")
     return redirect("publications:composition")
-
 
 @role_required("editeur", "admin")
 def placer_article_page(request, article_id):
@@ -250,7 +247,6 @@ def placer_article_page(request, article_id):
             
     return redirect(f"/publications/composition/?numero_id={page.publication.pk}#page-{page.pk}")
 
-
 @role_required("editeur", "admin")
 @require_POST
 def modifier_continuite_article(request, page_id, article_id):
@@ -263,7 +259,6 @@ def modifier_continuite_article(request, page_id, article_id):
         
     placement.save()
     return redirect(f"/publications/composition/?numero_id={placement.page.publication.pk}#page-{page_id}")
-
 
 @role_required("editeur", "admin")
 @require_POST
@@ -286,7 +281,6 @@ def changer_ordre_article(request, page_id, article_id):
     page = get_object_or_404(Page, pk=page_id)
     return redirect(f"/publications/composition/?numero_id={page.publication.pk}#page-{page_id}")
 
-
 @role_required("editeur", "admin")
 @require_POST
 def retirer_article_page(request, page_id, article_id):
@@ -301,7 +295,6 @@ def retirer_article_page(request, page_id, article_id):
         messages.success(request, f"L'article a été retiré de la page {page.numero_page}.")
         
     return redirect(f"/publications/composition/?numero_id={page.publication.pk}#page-{page.pk}")
-
 
 @role_required("editeur", "membre_redaction", "admin")
 def renvoyer_a_selection(request):
@@ -331,4 +324,26 @@ def renvoyer_a_selection(request):
         else:
             messages.success(request, f"{count} article(s) ont été renvoyés vers la page de sélection.")
         
+    return redirect("publications:composition")
+
+@role_required("editeur", "admin")
+@require_POST
+def modifier_avis_image(request, image_id):
+    image = get_object_or_404(Image, pk=image_id)
+    nouvel_avis = request.POST.get("avis")
+    commentaire = request.POST.get("commentaire", "").strip()
+
+    if nouvel_avis in ["favorable", "defavorable", "a_remplacer"]:
+        image.avis_editeur = nouvel_avis
+        if commentaire:
+            image.commentaire_editeur = commentaire
+        image.save()
+        messages.success(request, f"L'avis sur l'image de « {image.article.titre} » a été mis à jour.")
+    else:
+        messages.error(request, "Avis invalide.")
+
+    # On redirige vers la page d'où l'on vient (le Chemin de fer)
+    referer = request.META.get('HTTP_REFERER')
+    if referer:
+        return redirect(referer)
     return redirect("publications:composition")

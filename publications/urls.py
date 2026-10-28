@@ -30,4 +30,5 @@ urlpatterns = [
     path("<int:pk>/ajouter/", views.ajouter_au_numero, name="ajouter_au_numero"),
     path("<int:pk>/reserver/", views.reserver_article, name="reserver_article"),
     path("<int:pk>/annuler-validation/", views.annuler_validation, name="annuler_validation"),
+    path("image/<int:image_id>/avis/", views.modifier_avis_image, name="modifier_avis_image"),
 ]
