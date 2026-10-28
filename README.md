@@ -43,6 +43,26 @@ Le projet est divisé en plusieurs applications, chacune ayant une responsabilit
 ## ⚙️ Installation et lancement en local
 
 1. **Cloner le dépôt** :
+    ```bash
+    git clone https://github.com/votre-nom/RedacLO.git
+    cd RedacLO
+
+2. **Créer et activer un environnement virtuel**
 ```bash
-git clone https://github.com/votre-nom/RedacLO.git
-cd RedacLO
+    python -m venv .venv
+    # Sur Windows :
+    .venv\Scripts\activate
+    # Sur macOS/Linux :
+    source .venv/bin/activate
+
+3. **Installer les dépendances**
+    pip install -r requirements.txt
+
+
+4. **Appliquer les migrations**
+    python manage.py makemigrations
+    python manage.py migrate
+
+
+5. **Lancer le serveur de développement**
+    python manage.py runserver
