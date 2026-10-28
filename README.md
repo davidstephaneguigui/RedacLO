@@ -47,22 +47,23 @@ Le projet est divisé en plusieurs applications, chacune ayant une responsabilit
     git clone https://github.com/votre-nom/RedacLO.git
     cd RedacLO
 
-2. **Créer et activer un environnement virtuel**
-```bash
+2. **Créer et activer un environnement virtuel** :
+    ```bash
     python -m venv .venv
     # Sur Windows :
     .venv\Scripts\activate
     # Sur macOS/Linux :
     source .venv/bin/activate
 
-3. **Installer les dépendances**
+3.  **Installer les dépendances** :
+    ```bash
     pip install -r requirements.txt
 
-
-4. **Appliquer les migrations**
+4.  **Appliquer les migrations**
+    ```bash
     python manage.py makemigrations
     python manage.py migrate
 
-
-5. **Lancer le serveur de développement**
+5.  **Lancer le serveur de développement**
+    ```bash
     python manage.py runserver
