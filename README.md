@@ -70,4 +70,8 @@ Le projet est divisé en plusieurs applications, chacune ayant une responsabilit
 
 6. **Acceder au site** :
     ```bash
+<<<<<<< HEAD
     Ouvrez votre navigateur et rendez-vous sur http://127.0.0.1:8000/.
+=======
+    Ouvrez votre navigateur et rendez-vous sur http://127.0.0.1:8000/.
+>>>>>>> 230a668a4263a9e045459728c6be43bfad4279ee
