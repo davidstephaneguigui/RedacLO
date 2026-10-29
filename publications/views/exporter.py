@@ -5,7 +5,7 @@ from ..models import Publication, Page
 from display.models import GabaritPage
 
 @role_required("editeur", "membre_redaction", "admin")
-def organiser_page(request, page_id):
+def exporter_page(request, page_id):
     page = get_object_or_404(Page, pk=page_id)
     gabarits = GabaritPage.objects.all()
     
@@ -20,15 +20,15 @@ def organiser_page(request, page_id):
             page.save()
             messages.warning(request, f"Le modèle de la page {page.numero_page} a été retiré.")
             
-        return redirect("publications:organiser_page", page_id=page.pk)
+        return redirect("publications:exporter_page", page_id=page.pk)
         
-    return render(request, "publications/organiser.html", {
+    return render(request, "publications/exporter_page.html", {
         "page": page,
         "gabarits": gabarits
     })
 
 @role_required("editeur", "membre_redaction", "admin")
-def organiser_index(request):
+def exporter_index(request):
     numero_en_cours = Publication.objects.filter(statut="en_cours").first()
     if not numero_en_cours:
         messages.warning(request, "Aucun numéro en cours. Veuillez d'abord composer un numéro.")
@@ -36,7 +36,7 @@ def organiser_index(request):
     
     pages = numero_en_cours.pages.all().order_by("numero_page")
     
-    return render(request, "publications/organiser_index.html", {
+    return render(request, "publications/exporter_index.html", {
         "numero": numero_en_cours,
         "pages": pages
     })

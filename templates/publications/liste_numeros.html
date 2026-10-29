@@ -10,13 +10,16 @@
             <p style="margin: 0.2rem 0 0 0; color: #666; font-size: 0.9rem;">Fenêtre du N°{{ min_num }} au N°{{ max_num }}</p>
         </div>
         <div style="display: flex; gap: 0.5rem;">
-            <a href="{% url 'publications:archives_numeros' %}" class="btn btn-secondary">📁 Voir les archives</a>
+            <a href="{% url 'publications:archives_numeros' %}" class="btn btn-secondary">📁 Archives</a>
             
             <form method="post" action="{% url 'publications:creer_numero' %}" style="margin: 0;">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-success">➕ Créer le numéro suivant</button>
+                <button type="submit" class="btn btn-success">➕ Créer n°</button>
                 <a href="{% url 'publications:articles_reserves' %}" class="btn btn-secondary" style="margin-right: 0.5rem;">
-                    📌 Voir les articles réservés
+                    📌 Articles réservés
+                </a>
+                <a href="{% url 'publications:choisir' %}" class="btn btn-primary" style="margin-right: 0.5rem;">
+                    A choisir
                 </a>
             </form>
         </div>

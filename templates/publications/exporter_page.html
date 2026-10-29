@@ -1,17 +1,14 @@
 {% extends "base.html" %}
 
-{% block titre %}Organiser — Page {{ page.numero_page }}{% endblock %}
+{% block titre %}Exporter — Page {{ page.numero_page }}{% endblock %}
 
 {% block contenu %}
 <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); max-width: 800px; margin: 0 auto;">
-    <h2 style="margin-top: 0; color: #333;">Organiser la page {{ page.numero_page }}</h2>
+    <h2 style="margin-top: 0; color: #333;">Exporter la page {{ page.numero_page }}</h2>
     
     <p style="color: #666; margin-bottom: 2rem;">
         Choisissez le modèle de mise en page pour cette page. <br>
-        <em>(Cette fonctionnalité sera reliée plus tard au secrétariat de rédaction pour la génération finale).</em>
     </p>
-
-
 
     <form method="post" style="display: flex; flex-direction: column; gap: 1.5rem;">
         {% csrf_token %}
@@ -32,13 +29,9 @@
             <button type="submit" class="btn btn-primary">Enregistrer le modèle</button>
                 <a href="{% url 'display:export_idml' page.pk %}" class="btn btn-success" style="background-color: #2e7d32; border-color: #2e7d32; color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; display: inline-block;">
                     ⬇️ Télécharger le fichier InDesign (.idml)</a>
-            <a href="{% url 'publications:organiser_index' %}" class="btn btn-secondary">&larr; Retour à l'organisation</a>
+            <a href="{% url 'publications:exporter_index' %}" class="btn btn-secondary">&larr; Retour à l'index</a>
         </div>
     </form>
 </div>
-
-
-
-
 
 {% endblock %}

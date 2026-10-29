@@ -49,7 +49,8 @@
                         <a href="{% url 'publications:choisir' %}" class="btn btn-ghost {% if request.resolver_match.url_name == 'choisir' %}active{% endif %}">Choisir</a>
                         <a href="{% url 'publications:articles_reserves' %}" class="btn btn-ghost {% if request.resolver_match.url_name == 'articles_reserves' %}active{% endif %}">Réserver</a>
                         <a href="{% url 'publications:composition' %}" class="btn btn-ghost {% if request.resolver_match.url_name == 'composition' %}active{% endif %}">Composer</a>
-                        <a href="{% url 'publications:organiser_index' %}" class="btn btn-ghost {% if request.resolver_match.url_name == 'organiser_index' %}active{% endif %}">Organiser</a>
+                        <a href="{% url 'publications:exporter_index' %}" class="btn btn-ghost {% if request.resolver_match.url_name == 'exporter_index' %}active{% endif %}">📥 Exporter</a>
+                        <a href="{% url 'publications:numeros' %}" class="btn btn-ghost {% if request.resolver_match.url_name == 'numeros' %}active{% endif %}">Numéros</a>
                     {% endif %}
                 </div>
             </nav>

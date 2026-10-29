@@ -1,14 +1,14 @@
 {% extends "base.html" %}
 
-{% block titre %}Organiser — N° {{ numero.numero }}{% endblock %}
+{% block titre %}Exporter — N° {{ numero.numero }}{% endblock %}
 
 {% block contenu %}
 <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
         <div>
-            <h2 style="margin: 0; color: #333;">Organisation du numéro n° {{ numero.numero }}</h2>
+            <h2 style="margin: 0; color: #333;">Exportation des pages du numéro n° {{ numero.numero }}</h2>
             <p style="color: #666; margin: 0.5rem 0 0 0;">
-                Choisissez une page pour définir son modèle de mise en page (gabarit).
+                Choisissez la page que vous voulez exporter.
             </p>
         </div>
         <a href="{% url 'publications:composition' %}" class="btn btn-secondary">&larr; Retour au Chemin de fer</a>
@@ -41,8 +41,8 @@
                 </div>
 
                 <div style="margin-top: auto;">
-                    <a href="{% url 'publications:organiser_page' page.pk %}" class="btn btn-sm btn-primary" style="width: 100%; display: block; text-align: center; box-sizing: border-box;">
-                        Configurer cette page
+                    <a href="{% url 'publications:exporter_page' page.pk %}" class="btn btn-sm btn-primary" style="width: 100%; display: block; text-align: center; box-sizing: border-box;">
+                        Voir cette page
                     </a>
                 </div>
             </div>
